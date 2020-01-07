@@ -1,7 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+
+	"github.com/chermehdi/egor/parse"
+)
 
 func main() {
-	fmt.Println("vim-go")
+	parser := parse.NewParser(os.Args)
+	options := parser.Parse()
+	fmt.Printf("%v\n", options)
 }
