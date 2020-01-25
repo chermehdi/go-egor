@@ -1,7 +1,10 @@
 package commands
 
 import (
+	"github.com/chermehdi/egor/config"
 	"github.com/stretchr/testify/assert"
+	"os"
+	"path"
 	"testing"
 )
 
@@ -51,6 +54,46 @@ func TestExtractTaskFromString(t *testing.T) {
 	assert.Equal(t, task.Languages["java"].TaskClass, "CMinimizeTheInteger")
 }
 
-func TestCurrentDirectory(t *testing.T) {
-	//CreateDirectoryStructure(config.Task{});
+func DeleteDir(dirPath string) {
+	_ = os.RemoveAll(dirPath)
+}
+
+func TestCreateDirectoryStructure(t *testing.T) {
+	task := config.Task{
+		Name:        "Dummy task",
+		Group:       "Codeforces",
+		Url:         "http://codeforces.com/test",
+		Interactive: false,
+		MemoryLimit: 250,
+		TimeLimit:   100,
+		Tests: []config.TestCase{
+			{Input: "1", Output: "2"},
+		},
+		TestType:  "",
+		Input:     config.IOType{"stdin"},
+		Output:    config.IOType{"stdout"},
+		Languages: nil,
+	}
+	configuration := config.Config{
+		Lang: struct {
+			Default string `yaml:"default"`
+		}{Default: "cpp"},
+		ConfigFileName: "egor-meta.json",
+		Version:        "1.0",
+		Author:         "MaxHeap",
+	}
+	rootDir := os.TempDir()
+	defer DeleteDir(rootDir)
+
+	err := CreateDirectoryStructure(task, configuration, rootDir)
+	assert.NoError(t, err)
+
+	taskDir := path.Join(rootDir, task.Name)
+
+	assert.FileExists(t, path.Join(taskDir, configuration.ConfigFileName))
+	assert.DirExists(t, path.Join(taskDir, "inputs"))
+	assert.DirExists(t, path.Join(taskDir, "outputs"))
+	assert.FileExists(t, path.Join(taskDir, "main.cpp"))
+	assert.FileExists(t, path.Join(taskDir, "inputs", "test-0.in"))
+	assert.FileExists(t, path.Join(taskDir, "outputs", "test-0.ans"))
 }

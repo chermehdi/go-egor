@@ -34,16 +34,12 @@ func CreateFile(filePath string) (*os.File, error) {
 	return os.OpenFile(filePath, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0777)
 }
 
-func CreateDirectoryStructure(task Task, config Config) error {
-	dir, err := os.Getwd()
-	if err != nil {
+func CreateDirectoryStructure(task Task, config Config, rootDir string) error {
+	taskDir := path.Join(rootDir, task.Name)
+	if err := os.Mkdir(taskDir, 0777); err != nil {
 		return err
 	}
-	taskDir := path.Join(dir, task.Name)
-	if err = os.Mkdir(taskDir, 0777); err != nil {
-		return err
-	}
-	if err = os.Chdir(taskDir); err != nil {
+	if err := os.Chdir(taskDir); err != nil {
 		return err
 	}
 	egorMeta := NewEgorMeta(task, config)
@@ -168,12 +164,15 @@ func ParseAction(context *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("task %v\n", task)
 	config, err := LoadDefaultConfiguration()
 	if err != nil {
 		return err
 	}
-	err = CreateDirectoryStructure(*task, *config)
+	cwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	err = CreateDirectoryStructure(*task, *config, cwd)
 	if err != nil {
 		color.Red("Error happened %v", err)
 	}
