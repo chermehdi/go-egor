@@ -34,39 +34,39 @@ func CreateFile(filePath string) (*os.File, error) {
 	return os.OpenFile(filePath, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0777)
 }
 
-func CreateDirectoryStructure(task Task, config Config, rootDir string) error {
+func CreateDirectoryStructure(task Task, config Config, rootDir string) (string, error) {
 	taskDir := path.Join(rootDir, task.Name)
 	if err := os.Mkdir(taskDir, 0777); err != nil {
-		return err
+		return "", err
 	}
 	if err := os.Chdir(taskDir); err != nil {
-		return err
+		return "", err
 	}
 	egorMeta := NewEgorMeta(task, config)
 
 	file, err := CreateFile(config.ConfigFileName)
 	if err != nil {
-		return err
+		return "", err
 	}
 	if err = egorMeta.Save(file); err != nil {
-		return err
+		return "", err
 	}
 	if err = os.Mkdir("inputs", 0777); err != nil {
-		return err
+		return "", err
 	}
 
 	if err = os.Mkdir("outputs", 0777); err != nil {
-		return err
+		return "", err
 	}
 	inputs := egorMeta.Inputs
 	for i := 0; i < len(inputs); i++ {
 		file, err := CreateFile(inputs[i].Path)
 		if err != nil {
-			return err
+			return "", err
 		}
 		_, err = file.WriteString(task.Tests[i].Input)
 		if err != nil {
-			return err
+			return "", err
 		}
 	}
 
@@ -74,30 +74,30 @@ func CreateDirectoryStructure(task Task, config Config, rootDir string) error {
 	for i := 0; i < len(outputs); i++ {
 		file, err := CreateFile(outputs[i].Path)
 		if err != nil {
-			return err
+			return "", err
 		}
 		_, err = file.WriteString(task.Tests[i].Output)
 		if err != nil {
-			return err
+			return "", err
 		}
 	}
 	templateContent, err := templates.ResolveTemplateByLanguage(config.Lang.Default)
 	if err != nil {
-		return err
+		return "", err
 	}
 	template := template2.New("Solution template")
 	compiledTemplate, err := template.Parse(templateContent)
 	if err != nil {
-		return err
+		return "", err
 	}
 	taskFile, err := CreateFile(egorMeta.TaskFile)
 	if err != nil {
-		return err
+		return "", err
 	}
 	if err = compiledTemplate.Execute(taskFile, config); err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return taskDir, nil
 }
 
 // Given the json string returned by competitive companion
@@ -172,10 +172,12 @@ func ParseAction(context *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	err = CreateDirectoryStructure(*task, *config, cwd)
+	taskDir, err := CreateDirectoryStructure(*task, *config, cwd)
 	if err != nil {
 		color.Red("Error happened %v", err)
+		return err
 	}
+	color.Green("Created task directory in : %s\n", taskDir)
 	return nil
 }
 
@@ -190,4 +192,11 @@ var ParseCommand = cli.Command{
 	Usage:     "Parse a task using 'Competitive Companion'",
 	UsageText: "parse task from navigator",
 	Action:    ParseAction,
+	//Flags: []cli.Flag{
+	//	//&cli.BoolFlag{
+	//	//	Name:    "cd",
+	//	//	Aliases: []string{"c"},
+	//	//	Usage:   "Change to task directory after creating the task",
+	//	//},
+	//},
 }
