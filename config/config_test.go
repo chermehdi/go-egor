@@ -45,7 +45,7 @@ func createFakeConfigFile() error {
 }
 
 func TestLoadConfiguration(t *testing.T) {
-	createFakeConfigFile()
+	_ = createFakeConfigFile()
 	defer deleteFakeConfigFile()
 	config, err := LoadConfiguration(getConfigPath())
 	if err != nil {
@@ -55,7 +55,7 @@ func TestLoadConfiguration(t *testing.T) {
 	assert.Equal(t, config.Server.Port, getDefaultConfiguration().Server.Port)
 }
 
-func deleteFakeConfigFile() error {
+func deleteFakeConfigFile() {
 	configPath := getConfigPath()
-	return os.Remove(configPath)
+	_ = os.Remove(configPath)
 }

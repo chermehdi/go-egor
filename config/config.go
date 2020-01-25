@@ -16,7 +16,9 @@ type Config struct {
 	Lang struct {
 		Default string `yaml:"default"`
 	}
-	Version string `yaml:"version"`
+	ConfigFileName string `yaml:"config_file_name"`
+	Version        string `yaml:"version"`
+	Author         string `yaml:"author"`
 }
 
 func getDefaultConfigLocation() (string, error) {
@@ -39,7 +41,8 @@ func createDefaultConfiguration() *Config {
 		}{
 			Default: "cpp",
 		},
-		Version: "1.0",
+		Version:        "1.0",
+		ConfigFileName: "egor-meta.json",
 	}
 }
 
@@ -57,7 +60,7 @@ func saveDefaultConfiguration() error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(location, buffer.Bytes(), 0644)
+	return ioutil.WriteFile(location, buffer.Bytes(), 0777)
 }
 
 // Returns the Configuration object associated with
@@ -86,7 +89,9 @@ func LoadDefaultConfiguration() (*Config, error) {
 	}
 	if _, err := os.Stat(location); err != nil {
 		if os.IsNotExist(err) {
-			saveDefaultConfiguration()
+			if err := saveDefaultConfiguration(); err != nil {
+				return nil, err
+			}
 		}
 	}
 	return LoadConfiguration(location)

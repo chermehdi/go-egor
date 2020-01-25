@@ -37,6 +37,7 @@ func main() {
 
 	app := &cli.App{
 		Name:        egor.String(),
+		Usage:       "Run egor -help to print usage",
 		Description: "Competitive programming helper CLI",
 		UsageText:   "Run egor <subcommand> [--flags]*",
 		Commands: []*cli.Command{
