@@ -44,6 +44,7 @@ func main() {
 		Commands: []*cli.Command{
 			&commands.ParseCommand,
 			&commands.ConfigCommand,
+			&commands.CaseCommand,
 		},
 	}
 
