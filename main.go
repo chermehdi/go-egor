@@ -42,6 +42,7 @@ func main() {
 		UsageText:   "Run egor <subcommand> [--flags]*",
 		Commands: []*cli.Command{
 			&commands.ParseCommand,
+			&commands.CaseCommand,
 		},
 	}
 
