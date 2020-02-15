@@ -12,12 +12,14 @@ import (
 type IoFile struct {
 	Name string
 	Path string
+	Custom bool
 }
 
-func NewIoFile(fileName, filePath string) IoFile {
+func NewIoFile(fileName, filePath string, custom_case bool) IoFile {
 	return IoFile{
 		Name: fileName,
 		Path: filePath,
+		Custom: custom_case,
 	}
 }
 
@@ -53,8 +55,8 @@ func NewEgorMeta(task Task, config Config) EgorMeta {
 	outputs := make([]IoFile, testCount)
 	for i := 0; i < testCount; i++ {
 		fileName := fmt.Sprintf("test-%d", i)
-		inputs[i] = NewIoFile(fileName, path.Join("inputs", fileName+".in"))
-		outputs[i] = NewIoFile(fileName, path.Join("outputs", fileName+".ans"))
+		inputs[i] = NewIoFile(fileName, path.Join("inputs", fileName+".in",), false)
+		outputs[i] = NewIoFile(fileName, path.Join("outputs", fileName+".ans"), false)
 	}
 	taskFile, err := GetTaskName(config)
 	if err != nil {
