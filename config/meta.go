@@ -17,11 +17,11 @@ type IoFile struct {
 	NoTimeOut 	bool
 }
 
-func NewIoFile(fileName, filePath string, custom_case, noTimeOut bool) IoFile {
+func NewIoFile(fileName, filePath string, customCase, noTimeOut bool) IoFile {
 	return IoFile{
 		Name:   	fileName,
 		Path:   	filePath,
-		Custom: 	custom_case,
+		Custom: 	customCase,
 		NoTimeOut: 	noTimeOut,
 	}
 }
