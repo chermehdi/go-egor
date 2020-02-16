@@ -1,11 +1,12 @@
 package commands
 
 import (
-	"github.com/chermehdi/egor/config"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/chermehdi/egor/config"
+	"github.com/stretchr/testify/assert"
 )
 
 func getDummyTaskJson() string {
@@ -70,8 +71,8 @@ func TestCreateDirectoryStructure(t *testing.T) {
 			{Input: "1", Output: "2"},
 		},
 		TestType:  "",
-		Input:     config.IOType{"stdin"},
-		Output:    config.IOType{"stdout"},
+		Input:     config.IOType{Type: "stdin"},
+		Output:    config.IOType{Type: "stdout"},
 		Languages: nil,
 	}
 	configuration := config.Config{
@@ -85,7 +86,7 @@ func TestCreateDirectoryStructure(t *testing.T) {
 	rootDir := os.TempDir()
 	defer DeleteDir(rootDir)
 
-	err := CreateDirectoryStructure(task, configuration, rootDir)
+	_, err := CreateDirectoryStructure(task, configuration, rootDir)
 	assert.NoError(t, err)
 
 	taskDir := path.Join(rootDir, task.Name)
