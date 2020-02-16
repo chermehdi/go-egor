@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"path"
+	"os"
 )
 
 type IoFile struct {
@@ -88,9 +89,37 @@ func (egor *EgorMeta) Save(w io.Writer) error {
 	return err
 }
 
+func (egor *EgorMeta) SaveToFile(file_path string) error {
+	file, _ := CreateFile(file_path)
+	return egor.Save(file)
+}
+
 // TODO(chermehdi): probably this should't be a member function
 func (egor *EgorMeta) Load(r io.Reader) error {
 	decoder := json2.NewDecoder(r)
 	err := decoder.Decode(egor)
 	return err
+}
+
+func LoadMeta(r io.Reader) (EgorMeta, error) {
+  var egor_meta EgorMeta
+  decoder := json2.NewDecoder(r)
+  err := decoder.Decode(&egor_meta)
+  return egor_meta, err
+}
+
+func LoadMetaFromPath(file_path string) (EgorMeta, error) {
+	file, _ := OpenFileFromPath(file_path)
+	return LoadMeta(file)
+}
+
+// TODO(Eroui): this is a duplicate function from parse.go
+// consider moving this somewhere common or use the other one
+func CreateFile(filePath string) (*os.File, error) {
+	return os.OpenFile(filePath, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0777)
+}
+
+func OpenFileFromPath(filePath string) (*os.File, error) {
+	file, err := os.Open(filePath)
+	return file, err
 }
