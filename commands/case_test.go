@@ -42,7 +42,7 @@ func TestAddNewCaseInput(t *testing.T) {
 
 	// create temp inputs directory
 	_ = os.Mkdir("inputs", 0777)
-	defer DeleteDir("input")
+	defer DeleteDir("inputs")
 
 	inputLines := []string{"Hello", "World"}
 	caseName := "test-2"

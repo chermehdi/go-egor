@@ -89,7 +89,14 @@ func CustomCaseAction(context *cli.Context) error {
 		return err
 	}
 
-	metaData, err := config.LoadMetaFromPath(path.Join(cwd, "egor-meta.json"))
+	
+	configuration, err := config.LoadDefaultConfiguration()
+	if err != nil {
+		color.Red("Failed to load egor configuration")
+		return err
+	}
+
+	metaData, err := config.LoadMetaFromPath(path.Join(cwd, configuration.ConfigFileName))
 	if err != nil {
 		color.Red("Failed to load egor MetaData ")
 		return err
