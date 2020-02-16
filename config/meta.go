@@ -6,20 +6,20 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"path"
 	"os"
+	"path"
 )
 
 type IoFile struct {
-	Name string
-	Path string
+	Name   string
+	Path   string
 	Custom bool
 }
 
 func NewIoFile(fileName, filePath string, custom_case bool) IoFile {
 	return IoFile{
-		Name: fileName,
-		Path: filePath,
+		Name:   fileName,
+		Path:   filePath,
 		Custom: custom_case,
 	}
 }
@@ -56,7 +56,7 @@ func NewEgorMeta(task Task, config Config) EgorMeta {
 	outputs := make([]IoFile, testCount)
 	for i := 0; i < testCount; i++ {
 		fileName := fmt.Sprintf("test-%d", i)
-		inputs[i] = NewIoFile(fileName, path.Join("inputs", fileName+".in",), false)
+		inputs[i] = NewIoFile(fileName, path.Join("inputs", fileName+".in"), false)
 		outputs[i] = NewIoFile(fileName, path.Join("outputs", fileName+".ans"), false)
 	}
 	taskFile, err := GetTaskName(config)
@@ -102,10 +102,10 @@ func (egor *EgorMeta) Load(r io.Reader) error {
 }
 
 func LoadMeta(r io.Reader) (EgorMeta, error) {
-  var egor_meta EgorMeta
-  decoder := json2.NewDecoder(r)
-  err := decoder.Decode(&egor_meta)
-  return egor_meta, err
+	var egor_meta EgorMeta
+	decoder := json2.NewDecoder(r)
+	err := decoder.Decode(&egor_meta)
+	return egor_meta, err
 }
 
 func LoadMetaFromPath(file_path string) (EgorMeta, error) {
