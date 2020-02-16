@@ -2,10 +2,15 @@ package config
 
 import (
 	"bytes"
-	"gopkg.in/yaml.v2"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
+	"strconv"
+	"strings"
+
+	"gopkg.in/yaml.v2"
 )
 
 // The configuration of the CLI
@@ -34,7 +39,7 @@ func createDefaultConfiguration() *Config {
 		Server: struct {
 			Port int `yaml:"port"`
 		}{
-			Port: 12,
+			Port: 1200,
 		},
 		Lang: struct {
 			Default string `yaml:"default"`
@@ -49,14 +54,14 @@ func createDefaultConfiguration() *Config {
 // This function is called when the configuration file does not exist already
 // This will create the configuration file in the user config dir, with a minimalistic
 // default configuration
-func saveDefaultConfiguration() error {
+func SaveConfiguration(config *Config) error {
 	location, err := getDefaultConfigLocation()
 	if err != nil {
 		return err
 	}
 	var buffer bytes.Buffer
 	encoder := yaml.NewEncoder(&buffer)
-	err = encoder.Encode(createDefaultConfiguration())
+	err = encoder.Encode(config)
 	if err != nil {
 		return err
 	}
@@ -89,10 +94,25 @@ func LoadDefaultConfiguration() (*Config, error) {
 	}
 	if _, err := os.Stat(location); err != nil {
 		if os.IsNotExist(err) {
-			if err := saveDefaultConfiguration(); err != nil {
+			config := createDefaultConfiguration()
+			if err := SaveConfiguration(config); err != nil {
 				return nil, err
 			}
 		}
 	}
 	return LoadConfiguration(location)
+}
+
+// Gets the configuration value associated with the given key
+func GetConfigurationValue(config *Config, key string) (string, error) {
+	lowerKey := strings.ToLower(key)
+	if lowerKey == "server.port" {
+		return strconv.Itoa(config.Server.Port), nil
+	} else if lowerKey == "lang.default" {
+		return config.Lang.Default, nil
+	} else if lowerKey == "author" {
+		return config.Author, nil
+	} else {
+		return "", errors.New(fmt.Sprintf("Unknown config key %s", key))
+	}
 }

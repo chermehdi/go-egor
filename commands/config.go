@@ -70,7 +70,7 @@ func GetAction(context *cli.Context) error {
 		fmt.Println("Current configuration: ")
 		color.Green("server.port\t\t %d\n", configuration.Server.Port)
 		color.Green("lang.default\t\t %s\n", configuration.Lang.Default)
-		color.Green("author\t\t %s\n", configuration.Author)
+		color.Green("author      \t\t %s\n", configuration.Author)
 		return nil
 	} else {
 		value, err := config.GetConfigurationValue(configuration, context.Args().First())

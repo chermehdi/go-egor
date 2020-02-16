@@ -2,12 +2,13 @@ package config
 
 import (
 	"bytes"
-	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v2"
 )
 
 func getDefaultConfiguration() *Config {
@@ -58,4 +59,15 @@ func TestLoadConfiguration(t *testing.T) {
 func deleteFakeConfigFile() {
 	configPath := getConfigPath()
 	_ = os.Remove(configPath)
+}
+
+func TestGetConfigurationValue(t *testing.T) {
+	config := createDefaultConfiguration()
+
+	value, err := GetConfigurationValue(config, "server.port")
+	assert.NoError(t, err, "No error should be thrown when getting an existing key")
+	assert.Equal(t, value, "1200")
+
+	_, err = GetConfigurationValue(config, "unknown.key")
+	assert.Error(t, err, "An error is returned if the configuration key is not known")
 }

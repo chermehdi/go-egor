@@ -2,12 +2,13 @@ package main
 
 import (
 	"bytes"
-	"github.com/chermehdi/egor/commands"
-	"github.com/chermehdi/egor/config"
-	"github.com/urfave/cli/v2"
 	"html/template"
 	"log"
 	"os"
+
+	"github.com/chermehdi/egor/commands"
+	"github.com/chermehdi/egor/config"
+	"github.com/urfave/cli/v2"
 )
 
 const Egor = `
@@ -42,6 +43,7 @@ func main() {
 		UsageText:   "Run egor <subcommand> [--flags]*",
 		Commands: []*cli.Command{
 			&commands.ParseCommand,
+			&commands.ConfigCommand,
 		},
 	}
 
