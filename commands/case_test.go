@@ -7,6 +7,7 @@ import (
 	"testing"
 )
 
+
 func createDummyMetaData() (config.EgorMeta) {
 	meteData := config.EgorMeta {
 		TaskName:	"Dummy Task",
@@ -41,6 +42,7 @@ func TestAddNewCaseInput(t *testing.T) {
 
 	// create temp inputs directory
 	_ = os.Mkdir("inputs", 0777)
+	defer DeleteDir("input")
 
 	inputLines := []string{"Hello", "World"}
 	caseName := "test-2"
@@ -52,7 +54,6 @@ func TestAddNewCaseInput(t *testing.T) {
 	assert.Equal(t, meteData.Inputs[2].Custom, true)
 	assert.Equal(t, meteData.Inputs[2].NoTimeOut, true)
 	
-	_ = os.RemoveAll("inputs")
 }
 
 
@@ -61,6 +62,7 @@ func TestAddNewCaseOutput(t *testing.T) {
 
 	// create temp outputs directory
 	_ = os.Mkdir("outputs", 0777)
+	defer DeleteDir("outputs")
 
 	outputLines := []string{"Hello", "World"}
 	caseName := "test-2"
@@ -71,5 +73,4 @@ func TestAddNewCaseOutput(t *testing.T) {
 	assert.Equal(t, meteData.Outputs[1].Name, caseName + ".ans")
 	assert.Equal(t, meteData.Outputs[1].Custom, true)
 
-	_ = os.RemoveAll("outputs")
 }

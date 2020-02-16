@@ -103,6 +103,7 @@ func (egor *EgorMeta) Load(r io.Reader) error {
 	return err
 }
 
+// Load egor meta data from a given reader
 func LoadMeta(r io.Reader) (EgorMeta, error) {
 	var egor_meta EgorMeta
 	decoder := json2.NewDecoder(r)
@@ -110,6 +111,7 @@ func LoadMeta(r io.Reader) (EgorMeta, error) {
 	return egor_meta, err
 }
 
+// Load egor meta data form a filepath
 func LoadMetaFromPath(filePath string) (EgorMeta, error) {
 	file, _ := OpenFileFromPath(filePath)
 	return LoadMeta(file)
@@ -121,6 +123,7 @@ func CreateFile(filePath string) (*os.File, error) {
 	return os.OpenFile(filePath, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0777)
 }
 
+// Open file with a given file path
 func OpenFileFromPath(filePath string) (*os.File, error) {
 	file, err := os.Open(filePath)
 	return file, err

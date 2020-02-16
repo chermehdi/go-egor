@@ -11,13 +11,13 @@ import (
 	"strconv"
 )
 
+// Read from stdin till ctrl D or Command D
 func readFromStdin() []string {
 	scn := bufio.NewScanner(os.Stdin)
 	var lines []string
 	for scn.Scan() {
 		line := scn.Text()
 		if len(line) == 1 {
-			// Group Separator (GS ^]): ctrl-]
 			if line[0] == '\x1D' {
 				break
 			}
@@ -27,49 +27,58 @@ func readFromStdin() []string {
 	return lines
 }
 
-func writeLinesToFile(filename string, lines []string) {
+// Write given lines to given filename
+func writeLinesToFile(filename string, lines []string) error {
 	f, err := os.Create(filename)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 
 	for _, line := range lines {
 		fmt.Fprintln(f, line)
 		if err != nil {
-			fmt.Println(err)
-			return
+			return err
 		}
 	}
+
+	return nil
 }
 
+// Create and save user specified custom case input, and update the given egor meta data 
 func AddNewCaseInput(inputLines []string,
 	caseName string,
 	metaData config.EgorMeta,
 	noTimeOut bool) (config.EgorMeta, error) {
 
 	inputFileName := caseName + ".in"
-	writeLinesToFile(path.Join("inputs", inputFileName), inputLines)
+	err := writeLinesToFile(path.Join("inputs", inputFileName), inputLines)
+	if err != nil {
+		return metaData, err
+	}
 	inputFile := config.NewIoFile(inputFileName, path.Join("inputs", inputFileName), true, noTimeOut)
 	metaData.Inputs = append(metaData.Inputs, inputFile)
 
 	return metaData, nil
 }
 
+// Create and save user specified custom csae output, and update the given egor meta data 
 func AddNewCaseOutput(outputLines []string,
 	caseName string,
 	metaData config.EgorMeta,
 	noTimeOut bool) (config.EgorMeta, error) {
 
 	outputFileName := caseName + ".ans"
-	writeLinesToFile(path.Join("outputs", outputFileName), outputLines)
+	err := writeLinesToFile(path.Join("outputs", outputFileName), outputLines)
+	if err != nil {
+		return metaData, err
+	}
 	outputFile := config.NewIoFile(outputFileName, path.Join("outputs", outputFileName), true, noTimeOut)
 	metaData.Outputs = append(metaData.Outputs, outputFile)
 
 	return metaData, nil
 }
 
-// TODO(Eroui): add checks on errors
+// Create a user custom test case
 func CustomCaseAction(context *cli.Context) error {
 	color.Green("Creating Custom Test Case...")
 
@@ -122,7 +131,7 @@ func CustomCaseAction(context *cli.Context) error {
 
 var CaseCommand = cli.Command{
 	Name:      "case",
-	Aliases:   []string{"c"},
+	Aliases:   []string{"tc", "testcase"},
 	Usage:     "Create a custom test case.",
 	UsageText: "Add custom test cases to egor task.",
 	Action:    CustomCaseAction,
