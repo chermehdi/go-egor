@@ -43,28 +43,30 @@ func writeLinesToFile(filename string, lines []string) {
 	}
 }
 
-func AddNewCaseInput(input_lines []string,
-	case_name string,
-	meta_data config.EgorMeta) (config.EgorMeta, error) {
+func AddNewCaseInput(inputLines []string,
+	caseName string,
+	metaData config.EgorMeta,
+	noTimeOut bool) (config.EgorMeta, error) {
 
-	input_file_name := case_name + ".in"
-	writeLinesToFile("inputs/"+input_file_name, input_lines)
-	input_file := config.NewIoFile(input_file_name, "inputs/"+input_file_name, true)
-	meta_data.Inputs = append(meta_data.Inputs, input_file)
+	inputFileName := caseName + ".in"
+	writeLinesToFile(path.Join("inputs", inputFileName), inputLines)
+	inputFile := config.NewIoFile(inputFileName, path.Join("inputs", inputFileName), true, noTimeOut)
+	metaData.Inputs = append(metaData.Inputs, inputFile)
 
-	return meta_data, nil
+	return metaData, nil
 }
 
-func AddNewCaseOutput(output_lines []string,
-	case_name string,
-	meta_data config.EgorMeta) (config.EgorMeta, error) {
+func AddNewCaseOutput(outputLines []string,
+	caseName string,
+	metaData config.EgorMeta,
+	noTimeOut bool) (config.EgorMeta, error) {
 
-	output_file_name := case_name + ".ans"
-	writeLinesToFile("outputs/"+output_file_name, output_lines)
-	output_file := config.NewIoFile(output_file_name, "outputs/"+output_file_name, true)
-	meta_data.Outputs = append(meta_data.Outputs, output_file)
+	outputFileName := caseName + ".ans"
+	writeLinesToFile(path.Join("outputs", outputFileName), outputLines)
+	outputFile := config.NewIoFile(outputFileName, path.Join("outputs", outputFileName), true, noTimeOut)
+	metaData.Outputs = append(metaData.Outputs, outputFile)
 
-	return meta_data, nil
+	return metaData, nil
 }
 
 // TODO(Eroui): add checks on errors
@@ -74,33 +76,47 @@ func CustomCaseAction(context *cli.Context) error {
 	// Load meta data
 	cwd, err := os.Getwd()
 	if err != nil {
-		return err
-	}
-
-	meta_data, err := config.LoadMetaFromPath(path.Join(cwd, "egor-meta.json"))
-	if err != nil {
-		return err
-	}
-
-	case_name := "test-" + strconv.Itoa(len(meta_data.Inputs))
-	color.Green("Provide your input:")
-	input_lines := readFromStdin()
-	meta_data, err = AddNewCaseInput(input_lines, case_name, meta_data)
-
-	if !context.Bool("no-output") {
-		color.Green("Provide your output:")
-		output_lines := readFromStdin()
-		meta_data, err = AddNewCaseOutput(output_lines, case_name, meta_data)
-	}
-
-	meta_data.SaveToFile(path.Join(cwd, "egor-meta.json"))
-
-	if err != nil {
 		color.Red("Failed to Generate Custom Case")
 		return err
 	}
 
-	color.Green("Created Custom Test Case...")
+	metaData, err := config.LoadMetaFromPath(path.Join(cwd, "egor-meta.json"))
+	if err != nil {
+		color.Red("Failed to load egor MetaData ")
+		return err
+	}
+
+	noTimeOut := context.Bool("no-timeout")
+
+	caseName := "test-" + strconv.Itoa(len(metaData.Inputs))
+	color.Green("Provide your input:")
+	inputLines := readFromStdin()
+	metaData, err = AddNewCaseInput(inputLines, caseName, metaData, noTimeOut)
+
+	if err != nil {
+		color.Red("Failed to add new case input")
+		return err
+	}
+
+	if !context.Bool("no-output") {
+		color.Green("Provide your output:")
+		outputLines := readFromStdin()
+		metaData, err = AddNewCaseOutput(outputLines, caseName, metaData, noTimeOut)
+
+		if err != nil {
+			color.Red("Failed to add new case output")
+			return err
+		}
+	}
+
+	metaData.SaveToFile(path.Join(cwd, "egor-meta.json"))
+
+	if err != nil {
+		color.Red("Failed to save to MetaData")
+		return err
+	}
+
+	color.Green("Created Custom Test Case")
 	return nil
 }
 
@@ -114,6 +130,11 @@ var CaseCommand = cli.Command{
 		&cli.BoolFlag{
 			Name:  "no-output",
 			Usage: "This test case doesnt have output",
+			Value: false,
+		},
+		&cli.BoolFlag{
+			Name:  "no-timeout",
+			Usage: "This test case should not timeout when passed time limit",
 			Value: false,
 		},
 	},

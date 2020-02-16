@@ -11,16 +11,18 @@ import (
 )
 
 type IoFile struct {
-	Name   string
-	Path   string
-	Custom bool
+	Name   		string
+	Path   		string
+	Custom 		bool
+	NoTimeOut 	bool
 }
 
-func NewIoFile(fileName, filePath string, custom_case bool) IoFile {
+func NewIoFile(fileName, filePath string, custom_case, noTimeOut bool) IoFile {
 	return IoFile{
-		Name:   fileName,
-		Path:   filePath,
-		Custom: custom_case,
+		Name:   	fileName,
+		Path:   	filePath,
+		Custom: 	custom_case,
+		NoTimeOut: 	noTimeOut,
 	}
 }
 
@@ -56,8 +58,8 @@ func NewEgorMeta(task Task, config Config) EgorMeta {
 	outputs := make([]IoFile, testCount)
 	for i := 0; i < testCount; i++ {
 		fileName := fmt.Sprintf("test-%d", i)
-		inputs[i] = NewIoFile(fileName, path.Join("inputs", fileName+".in"), false)
-		outputs[i] = NewIoFile(fileName, path.Join("outputs", fileName+".ans"), false)
+		inputs[i] = NewIoFile(fileName, path.Join("inputs", fileName+".in"), false, false)
+		outputs[i] = NewIoFile(fileName, path.Join("outputs", fileName+".ans"), false, false)
 	}
 	taskFile, err := GetTaskName(config)
 	if err != nil {
@@ -89,8 +91,8 @@ func (egor *EgorMeta) Save(w io.Writer) error {
 	return err
 }
 
-func (egor *EgorMeta) SaveToFile(file_path string) error {
-	file, _ := CreateFile(file_path)
+func (egor *EgorMeta) SaveToFile(filePath string) error {
+	file, _ := CreateFile(filePath)
 	return egor.Save(file)
 }
 
@@ -108,8 +110,8 @@ func LoadMeta(r io.Reader) (EgorMeta, error) {
 	return egor_meta, err
 }
 
-func LoadMetaFromPath(file_path string) (EgorMeta, error) {
-	file, _ := OpenFileFromPath(file_path)
+func LoadMetaFromPath(filePath string) (EgorMeta, error) {
+	file, _ := OpenFileFromPath(filePath)
 	return LoadMeta(file)
 }
 
