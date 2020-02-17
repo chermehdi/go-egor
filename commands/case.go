@@ -94,7 +94,8 @@ func CustomCaseAction(context *cli.Context) error {
 		return err
 	}
 
-	metaData, err := config.LoadMetaFromPath(path.Join(cwd, configuration.ConfigFileName))
+  configFileName := configuration.ConfigFileName
+	metaData, err := config.LoadMetaFromPath(path.Join(cwd, configFileName))
 	if err != nil {
 		color.Red("Failed to load egor MetaData ")
 		return err
@@ -121,7 +122,7 @@ func CustomCaseAction(context *cli.Context) error {
 		}
 	}
 
-	metaData.SaveToFile(path.Join(cwd, "egor-meta.json"))
+	metaData.SaveToFile(path.Join(cwd, configFileName))
 
 	if err != nil {
 		color.Red("Failed to save to MetaData")
