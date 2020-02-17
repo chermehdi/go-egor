@@ -30,9 +30,6 @@ func SerializeTask(meta EgorMeta) (string, error) {
 	return buffer.String(), nil
 }
 
-func CreateFile(filePath string) (*os.File, error) {
-	return os.OpenFile(filePath, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0777)
-}
 
 func CreateDirectoryStructure(task Task, config Config, rootDir string) (string, error) {
 	taskDir := path.Join(rootDir, task.Name)

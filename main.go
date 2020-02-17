@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"log"
 	"os"
-
 	"github.com/chermehdi/egor/commands"
 	"github.com/chermehdi/egor/config"
 	"github.com/urfave/cli/v2"
@@ -44,6 +43,7 @@ func main() {
 		Commands: []*cli.Command{
 			&commands.ParseCommand,
 			&commands.ConfigCommand,
+			&commands.CaseCommand,
 		},
 	}
 

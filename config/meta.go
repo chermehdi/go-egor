@@ -6,18 +6,21 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"path"
 )
 
 type IoFile struct {
-	Name string
-	Path string
+	Name   		string
+	Path   		string
+	Custom 		bool
 }
 
-func NewIoFile(fileName, filePath string) IoFile {
+func NewIoFile(fileName, filePath string, customCase bool) IoFile {
 	return IoFile{
-		Name: fileName,
-		Path: filePath,
+		Name:   	fileName,
+		Path:   	filePath,
+		Custom: 	customCase,
 	}
 }
 
@@ -53,8 +56,8 @@ func NewEgorMeta(task Task, config Config) EgorMeta {
 	outputs := make([]IoFile, testCount)
 	for i := 0; i < testCount; i++ {
 		fileName := fmt.Sprintf("test-%d", i)
-		inputs[i] = NewIoFile(fileName, path.Join("inputs", fileName+".in"))
-		outputs[i] = NewIoFile(fileName, path.Join("outputs", fileName+".ans"))
+		inputs[i] = NewIoFile(fileName, path.Join("inputs", fileName+".in"), false)
+		outputs[i] = NewIoFile(fileName, path.Join("outputs", fileName+".ans"), false)
 	}
 	taskFile, err := GetTaskName(config)
 	if err != nil {
@@ -86,9 +89,40 @@ func (egor *EgorMeta) Save(w io.Writer) error {
 	return err
 }
 
+func (egor *EgorMeta) SaveToFile(filePath string) error {
+	file, _ := CreateFile(filePath)
+	return egor.Save(file)
+}
+
 // TODO(chermehdi): probably this should't be a member function
 func (egor *EgorMeta) Load(r io.Reader) error {
 	decoder := json2.NewDecoder(r)
 	err := decoder.Decode(egor)
 	return err
+}
+
+// Load egor meta data from a given reader
+func LoadMeta(r io.Reader) (EgorMeta, error) {
+	var egor_meta EgorMeta
+	decoder := json2.NewDecoder(r)
+	err := decoder.Decode(&egor_meta)
+	return egor_meta, err
+}
+
+// Load egor meta data form a filepath
+func LoadMetaFromPath(filePath string) (EgorMeta, error) {
+	file, _ := OpenFileFromPath(filePath)
+	return LoadMeta(file)
+}
+
+// TODO(Eroui): this is a duplicate function from parse.go
+// consider moving this somewhere common or use the other one
+func CreateFile(filePath string) (*os.File, error) {
+	return os.OpenFile(filePath, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0777)
+}
+
+// Open file with a given file path
+func OpenFileFromPath(filePath string) (*os.File, error) {
+	file, err := os.Open(filePath)
+	return file, err
 }
