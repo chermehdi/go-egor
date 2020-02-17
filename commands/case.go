@@ -47,15 +47,14 @@ func writeLinesToFile(filename string, lines []string) error {
 // Create and save user specified custom case input, and update the given egor meta data 
 func AddNewCaseInput(inputLines []string,
 	caseName string,
-	metaData config.EgorMeta,
-	noTimeOut bool) (config.EgorMeta, error) {
+	metaData config.EgorMeta) (config.EgorMeta, error) {
 
 	inputFileName := caseName + ".in"
 	err := writeLinesToFile(path.Join("inputs", inputFileName), inputLines)
 	if err != nil {
 		return metaData, err
 	}
-	inputFile := config.NewIoFile(inputFileName, path.Join("inputs", inputFileName), true, noTimeOut)
+	inputFile := config.NewIoFile(inputFileName, path.Join("inputs", inputFileName), true)
 	metaData.Inputs = append(metaData.Inputs, inputFile)
 
 	return metaData, nil
@@ -64,15 +63,14 @@ func AddNewCaseInput(inputLines []string,
 // Create and save user specified custom csae output, and update the given egor meta data 
 func AddNewCaseOutput(outputLines []string,
 	caseName string,
-	metaData config.EgorMeta,
-	noTimeOut bool) (config.EgorMeta, error) {
+	metaData config.EgorMeta) (config.EgorMeta, error) {
 
 	outputFileName := caseName + ".ans"
 	err := writeLinesToFile(path.Join("outputs", outputFileName), outputLines)
 	if err != nil {
 		return metaData, err
 	}
-	outputFile := config.NewIoFile(outputFileName, path.Join("outputs", outputFileName), true, noTimeOut)
+	outputFile := config.NewIoFile(outputFileName, path.Join("outputs", outputFileName), true)
 	metaData.Outputs = append(metaData.Outputs, outputFile)
 
 	return metaData, nil
@@ -102,12 +100,10 @@ func CustomCaseAction(context *cli.Context) error {
 		return err
 	}
 
-	noTimeOut := context.Bool("no-timeout")
-
 	caseName := "test-" + strconv.Itoa(len(metaData.Inputs))
 	color.Green("Provide your input:")
 	inputLines := readFromStdin()
-	metaData, err = AddNewCaseInput(inputLines, caseName, metaData, noTimeOut)
+	metaData, err = AddNewCaseInput(inputLines, caseName, metaData)
 
 	if err != nil {
 		color.Red("Failed to add new case input")
@@ -117,7 +113,7 @@ func CustomCaseAction(context *cli.Context) error {
 	if !context.Bool("no-output") {
 		color.Green("Provide your output:")
 		outputLines := readFromStdin()
-		metaData, err = AddNewCaseOutput(outputLines, caseName, metaData, noTimeOut)
+		metaData, err = AddNewCaseOutput(outputLines, caseName, metaData)
 
 		if err != nil {
 			color.Red("Failed to add new case output")
@@ -146,11 +142,6 @@ var CaseCommand = cli.Command{
 		&cli.BoolFlag{
 			Name:  "no-output",
 			Usage: "This test case doesnt have output",
-			Value: false,
-		},
-		&cli.BoolFlag{
-			Name:  "no-timeout",
-			Usage: "This test case should not timeout when passed time limit",
 			Value: false,
 		},
 	},

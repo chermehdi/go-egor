@@ -14,15 +14,13 @@ type IoFile struct {
 	Name   		string
 	Path   		string
 	Custom 		bool
-	NoTimeOut 	bool
 }
 
-func NewIoFile(fileName, filePath string, customCase, noTimeOut bool) IoFile {
+func NewIoFile(fileName, filePath string, customCase bool) IoFile {
 	return IoFile{
 		Name:   	fileName,
 		Path:   	filePath,
 		Custom: 	customCase,
-		NoTimeOut: 	noTimeOut,
 	}
 }
 
@@ -58,8 +56,8 @@ func NewEgorMeta(task Task, config Config) EgorMeta {
 	outputs := make([]IoFile, testCount)
 	for i := 0; i < testCount; i++ {
 		fileName := fmt.Sprintf("test-%d", i)
-		inputs[i] = NewIoFile(fileName, path.Join("inputs", fileName+".in"), false, false)
-		outputs[i] = NewIoFile(fileName, path.Join("outputs", fileName+".ans"), false, false)
+		inputs[i] = NewIoFile(fileName, path.Join("inputs", fileName+".in"), false)
+		outputs[i] = NewIoFile(fileName, path.Join("outputs", fileName+".ans"), false)
 	}
 	taskFile, err := GetTaskName(config)
 	if err != nil {
