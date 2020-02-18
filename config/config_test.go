@@ -21,6 +21,7 @@ func getDefaultConfiguration() *Config {
 		}{Default: "cpp"},
 	}
 }
+
 func getConfigPath() string {
 	tempDir := os.TempDir()
 	return path.Join(tempDir, "config.yaml")
@@ -38,7 +39,7 @@ func createFakeConfigFile() error {
 		return err
 	}
 	// write the fake configuration yaml to the file
-	err = ioutil.WriteFile(configPath, buffer.Bytes(), 0644)
+	err = ioutil.WriteFile(configPath, buffer.Bytes(), 777)
 	if err != nil {
 		return err
 	}
