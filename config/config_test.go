@@ -22,13 +22,16 @@ func getDefaultConfiguration() *Config {
 	}
 }
 
+var configurationPath string = getConfigPath()
+
 func getConfigPath() string {
-	tempDir := os.TempDir()
+	tempDir, _ := ioutil.TempDir("", "temp")
+
 	return path.Join(tempDir, "config.yaml")
 }
 
 func createFakeConfigFile() error {
-	configPath := getConfigPath()
+	configPath := configurationPath
 
 	var buffer bytes.Buffer
 	configuration := getDefaultConfiguration()
@@ -49,7 +52,7 @@ func createFakeConfigFile() error {
 func TestLoadConfiguration(t *testing.T) {
 	_ = createFakeConfigFile()
 	defer deleteFakeConfigFile()
-	config, err := LoadConfiguration(getConfigPath())
+	config, err := LoadConfiguration(configurationPath)
 	if err != nil {
 		t.Error(err)
 	}
@@ -58,7 +61,7 @@ func TestLoadConfiguration(t *testing.T) {
 }
 
 func deleteFakeConfigFile() {
-	configPath := getConfigPath()
+	configPath := configurationPath
 	_ = os.Remove(configPath)
 }
 
