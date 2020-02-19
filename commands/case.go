@@ -44,7 +44,7 @@ func writeLinesToFile(filename string, lines []string) error {
 	return nil
 }
 
-// Create and save user specified custom case input, and update the given egor meta data 
+// Create and save user specified custom case input, and update the given egor meta data
 func AddNewCaseInput(inputLines []string,
 	caseName string,
 	metaData config.EgorMeta) (config.EgorMeta, error) {
@@ -60,7 +60,7 @@ func AddNewCaseInput(inputLines []string,
 	return metaData, nil
 }
 
-// Create and save user specified custom csae output, and update the given egor meta data 
+// Create and save user specified custom csae output, and update the given egor meta data
 func AddNewCaseOutput(outputLines []string,
 	caseName string,
 	metaData config.EgorMeta) (config.EgorMeta, error) {
@@ -87,14 +87,13 @@ func CustomCaseAction(context *cli.Context) error {
 		return err
 	}
 
-	
 	configuration, err := config.LoadDefaultConfiguration()
 	if err != nil {
 		color.Red("Failed to load egor configuration")
 		return err
 	}
 
-  configFileName := configuration.ConfigFileName
+	configFileName := configuration.ConfigFileName
 	metaData, err := config.LoadMetaFromPath(path.Join(cwd, configFileName))
 	if err != nil {
 		color.Red("Failed to load egor MetaData ")
@@ -133,6 +132,12 @@ func CustomCaseAction(context *cli.Context) error {
 	return nil
 }
 
+// Command to add costum test cases to the current task.
+// Running this command will ask the user to provide their input and output, then 
+// saves the new test case data into appropriate files and add their meta data into
+// the current task egor meta data.
+// The user can add a flag --no-output to specify that this test case have no output 
+// associated with it. The user will not be asked to provide output in this case.
 var CaseCommand = cli.Command{
 	Name:      "case",
 	Aliases:   []string{"tc", "testcase"},
