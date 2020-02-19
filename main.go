@@ -44,6 +44,7 @@ func main() {
 			&commands.ParseCommand,
 			&commands.ConfigCommand,
 			&commands.CaseCommand,
+			&commands.ShowCasesCommand,
 		},
 	}
 
