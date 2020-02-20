@@ -8,6 +8,8 @@ import (
 	"io"
 	"os"
 	"path"
+	"strings"	
+	"strconv"
 )
 
 type IoFile struct {
@@ -22,6 +24,15 @@ func NewIoFile(fileName, filePath string, customCase bool) IoFile {
 		Path:   	filePath,
 		Custom: 	customCase,
 	}
+}
+
+func (ioFile *IoFile) GetId() int {
+	tokens := strings.Split(ioFile.Name, "-")
+	id, err := strconv.Atoi(tokens[1])
+	if err != nil {
+		return 0 
+	}
+	return id
 }
 
 // Type mapping to the `egor-meta.json` file.
@@ -71,6 +82,13 @@ func NewEgorMeta(task Task, config Config) EgorMeta {
 		TaskFile: taskFile,
 	}
 }
+
+// count the number of tests cases in the metadata. The number of tests is
+// the number of inputs
+func (egor *EgorMeta) CountTestCases() int {
+	return len(egor.Inputs)
+}
+
 func (egor *EgorMeta) toJson() (string, error) {
 	var buffer bytes.Buffer
 	encoder := json2.NewEncoder(&buffer)
