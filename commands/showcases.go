@@ -9,49 +9,60 @@ import (
 	"path"
 )
 
+type TestCaseIO struct {
+	Id int
+	Name string
+	InputPath string
+	OutputPath string
+	Custom bool
+}
+
+// parse input and output from egor meta to TestCase
+func GetTestCases(egorMeta config.EgorMeta) []*TestCaseIO {
+	testCasesMap := make(map[string]*TestCaseIO)
+	testCases := make([]*TestCaseIO, 0)
+	for _, input := range egorMeta.Inputs {
+		testCase := &TestCaseIO {
+			Id : input.GetId(),
+			Name : input.Name,
+			InputPath : input.Path,
+			OutputPath: "",
+			Custom: input.Custom,
+		}
+		testCasesMap[input.Name] = testCase
+		testCases = append(testCases, testCase)
+	}
+
+	for _, output := range egorMeta.Outputs {
+		if testCase, ok := testCasesMap[output.Name]; ok {
+			testCase.OutputPath = output.Path
+		}
+	}
+
+	return testCases
+}
+
 // print test cases table
-func PrintTestCasesTable(inputFiles, outputFiles map[string]config.IoFile) {
+func PrintTestCasesTable(testCases []*TestCaseIO) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"#", "Test Name", "Input Path", "Output Path", "Custon"})
-	for key, inputFile := range inputFiles {
-		id := inputFile.GetId()
-		testName := inputFile.Name
-		inputPath := inputFile.Path
-		outputPath := ""
-		custom := inputFile.Custom
-
-		outputFile, ok := outputFiles[key]
-		if ok {
-			outputPath = outputFile.Path
-		}
-
-		t.AppendRow([]interface{}{id, testName, inputPath, outputPath, custom})
+	for _, testCase := range testCases {
+		t.AppendRow([]interface{}{
+			testCase.Id,
+			testCase.Name,
+			testCase.InputPath,
+			testCase.OutputPath,
+			testCase.Custom,
+		})
 	}
 	t.SetStyle(table.StyleLight)
 	t.Render()
 }
 
-// construct inputs and outputs maps from an egor meta data where keys are test names.
-func GetIoFilesMaps(egorMeta config.EgorMeta) (map[string]config.IoFile, map[string]config.IoFile) {
-	inputFiles := make(map[string]config.IoFile)
-	for _, inputFile := range egorMeta.Inputs {
-		inputFiles[inputFile.Name] = inputFile
-	}
-
-	outputFiles := make(map[string]config.IoFile)
-	for _, outputFile := range egorMeta.Outputs {
-		outputFiles[outputFile.Name] = outputFile
-	}
-
-	return inputFiles, outputFiles
-}
-
 // print task test cases
-func PrintTestCases(egorMeta config.EgorMeta) error {
-	inputFiles, outputFiles := GetIoFilesMaps(egorMeta)
-	PrintTestCasesTable(inputFiles, outputFiles)
-	return nil
+func PrintTestCases(egorMeta config.EgorMeta) {
+	PrintTestCasesTable(GetTestCases(egorMeta))
 }
 
 // list test cases information command action
@@ -79,11 +90,8 @@ func ShowCasesAction(context *cli.Context) error {
 	color.Green("Listing %d testcase(s)...", metaData.CountTestCases())
 	color.Green("")
 	
-	err = PrintTestCases(metaData)
-	if err != nil {
-		color.Red("Error while printing test cases")
-		return err
-	}
+	PrintTestCases(metaData)
+
 	return nil
 }
 
@@ -92,7 +100,7 @@ func ShowCasesAction(context *cli.Context) error {
 // and prints it as an array into the consol.
 var ShowCasesCommand = cli.Command{
 	Name:      "showcases",
-	Aliases:   []string{"listcases"},
+	Aliases:   []string{"sc"},
 	Usage:     "list information about test cases",
 	UsageText: "list meta data about of the tests cases in the current task",
 	Action:    ShowCasesAction,
