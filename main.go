@@ -2,12 +2,12 @@ package main
 
 import (
 	"bytes"
-	"html/template"
-	"log"
-	"os"
 	"github.com/chermehdi/egor/commands"
 	"github.com/chermehdi/egor/config"
 	"github.com/urfave/cli/v2"
+	"html/template"
+	"log"
+	"os"
 )
 
 const Egor = `
@@ -45,6 +45,7 @@ func main() {
 			&commands.ConfigCommand,
 			&commands.CaseCommand,
 			&commands.ShowCasesCommand,
+			&commands.TestCommand,
 		},
 	}
 

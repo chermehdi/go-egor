@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"bytes"
 	"context"
 	json2 "encoding/json"
 	"fmt"
@@ -19,17 +18,6 @@ import (
 )
 
 const listenAddr = ":4243"
-
-// Serialize task into a JSON string.
-func SerializeTask(meta EgorMeta) (string, error) {
-	var buffer bytes.Buffer
-	encoder := json2.NewEncoder(&buffer)
-	if err := encoder.Encode(meta); err != nil {
-		return "", err
-	}
-	return buffer.String(), nil
-}
-
 
 func CreateDirectoryStructure(task Task, config Config, rootDir string) (string, error) {
 	taskDir := path.Join(rootDir, task.Name)
@@ -140,7 +128,7 @@ func waitForShutDown(server *http.Server, done chan<- string, quit <-chan string
 	done <- content
 }
 
-func ParseAction(context *cli.Context) error {
+func ParseAction(_ *cli.Context) error {
 	msgReceiveChannel := make(chan string, 1)
 	msgReadChannel := make(chan string, 1)
 
@@ -189,11 +177,4 @@ var ParseCommand = cli.Command{
 	Usage:     "Parse a task using 'Competitive Companion'",
 	UsageText: "parse task from navigator",
 	Action:    ParseAction,
-	//Flags: []cli.Flag{
-	//	//&cli.BoolFlag{
-	//	//	Name:    "cd",
-	//	//	Aliases: []string{"c"},
-	//	//	Usage:   "Change to task directory after creating the task",
-	//	//},
-	//},
 }
