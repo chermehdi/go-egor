@@ -23,7 +23,7 @@ func getDummyTaskJson() string {
 			"languages" : {
 			"java" : {
 				"mainClass" : "Main",
-					"taskClass" : "CMinimizeTheInteger"
+                "taskClass" : "CMinimizeTheInteger"
 			}
 		},
 		"input" : {
