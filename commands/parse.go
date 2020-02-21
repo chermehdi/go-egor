@@ -139,7 +139,7 @@ func waitForShutDown(server *http.Server, done chan<- string, quit <-chan string
 	done <- content
 }
 
-func ParseAction(context *cli.Context) error {
+func ParseAction(_ *cli.Context) error {
 	msgReceiveChannel := make(chan string, 1)
 	msgReadChannel := make(chan string, 1)
 
@@ -188,11 +188,4 @@ var ParseCommand = cli.Command{
 	Usage:     "Parse a task using 'Competitive Companion'",
 	UsageText: "parse task from navigator",
 	Action:    ParseAction,
-	//Flags: []cli.Flag{
-	//	//&cli.BoolFlag{
-	//	//	Name:    "cd",
-	//	//	Aliases: []string{"c"},
-	//	//	Usage:   "Change to task directory after creating the task",
-	//	//},
-	//},
 }

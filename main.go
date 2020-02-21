@@ -47,6 +47,7 @@ func main() {
 			&commands.ShowCasesCommand,
 			&commands.CopyCommand,
 			&commands.PrintCaseCommand,
+			&commands.TestCommand,
 		},
 	}
 

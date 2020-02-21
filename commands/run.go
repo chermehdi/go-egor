@@ -20,7 +20,7 @@ type DiffChecker struct {
 }
 
 func (c *DiffChecker) Check(got, expected string) error {
-	// Compre the trimmed output from both input and output
+	// Compare the trimmed output from both input and output
 	if strings.Trim(got, " \t\n\r") != strings.Trim(expected, " \t\n\r") {
 		return errors.New(fmt.Sprintf("Checker failed, expected %s, found %s", got, expected))
 	}
@@ -59,8 +59,8 @@ func RunAction(context *cli.Context) error {
 	return nil
 }
 
-var RunCommand = cli.Command{
-	Name:      "run",
+var TestCommand = cli.Command{
+	Name:      "test",
 	Aliases:   []string{"r"},
 	Usage:     "Run the current task testcases",
 	UsageText: "Run the current task testcases",
