@@ -184,7 +184,7 @@ func (judge *JavaJudge) Setup() error {
 	fmt.Printf("javac %s -d \"%s\"\n", judge.Meta.TaskFile, workDirPath)
 	cmd.Stderr = &stderrBuffer
 	if err = cmd.Run(); err != nil {
-		color.Red("Could not  compile %s, Cause: \n", stderrBuffer.String())
+		color.Red("Could not  compile, Cause: \n%s", stderrBuffer.String())
 		return err
 	}
 	judge.CurrentWorkDir = workDirPath
@@ -264,18 +264,98 @@ func (judge *JavaJudge) Cleanup() error {
 // C / Cpp Judge
 //
 type CppJudge struct {
-	Meta config.EgorMeta
+	Meta           config.EgorMeta
+	CurrentWorkDir string
+	Checker        Checker
 }
 
 func (judge *CppJudge) Setup() error {
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	workDirPath := path.Join(currentDir, "work")
+	if err = os.Mkdir(workDirPath, 0777); err != nil {
+		return err
+	}
+	var stderrBuffer bytes.Buffer
+	cmd := exec.Command("g++", judge.Meta.TaskFile, "-o", "work/sol")
+	cmd.Dir = currentDir
+	cmd.Stderr = &stderrBuffer
+	if err = cmd.Run(); err != nil {
+		color.Red("Could not  compile, Cause: \n%s", stderrBuffer.String())
+		return err
+	}
+	judge.CurrentWorkDir = workDirPath
 	return nil
 }
 
-func (judge *CppJudge) RunTestCase(description CaseDescription) CaseStatus {
-	return CaseStatus{}
+func (judge *CppJudge) RunTestCase(desc CaseDescription) CaseStatus {
+	// We suppose that all java executables will be called Main
+	cmd := exec.Command("./sol")
+	cmd.Dir = judge.CurrentWorkDir
+	inputFile, err := os.Open(desc.InputFile)
+	if err != nil {
+		return CaseStatus{
+			Status:       RE,
+			CheckerError: nil,
+		}
+	}
+	defer inputFile.Close()
+
+	outputFile, err := os.OpenFile(desc.WorkFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
+	if err != nil {
+		return CaseStatus{
+			Status:       RE,
+			CheckerError: nil,
+		}
+	}
+	defer outputFile.Close()
+
+	var stderrBuffer bytes.Buffer
+	cmd.Stdin = inputFile
+	cmd.Stdout = outputFile
+	cmd.Stderr = &stderrBuffer
+	if err = cmd.Run(); err != nil {
+		return CaseStatus{
+			Status:       RE,
+			CheckerError: nil,
+			Stderr:       stderrBuffer.String(),
+		}
+
+	}
+
+	expectedOutput, err := ioutil.ReadFile(desc.OutputFile)
+	if err != nil {
+		return CaseStatus{
+			Status:       RE,
+			CheckerError: nil,
+		}
+	}
+	output, err := ioutil.ReadFile(desc.WorkFile)
+
+	if err != nil {
+		return CaseStatus{
+			Status:       RE,
+			CheckerError: nil,
+		}
+	}
+	err = judge.Checker.Check(string(output), string(expectedOutput))
+	if err != nil {
+		return CaseStatus{
+			Status:       WA,
+			CheckerError: err,
+			Stderr:       stderrBuffer.String(),
+		}
+	}
+	return CaseStatus{
+		Status:       AC,
+		CheckerError: nil,
+		Stderr:       stderrBuffer.String(),
+	}
 }
 func (judge *CppJudge) Cleanup() error {
-	return nil
+	return os.RemoveAll(judge.CurrentWorkDir)
 }
 
 //
@@ -303,8 +383,9 @@ func NewJudgeFor(meta config.EgorMeta) (Judge, error) {
 	case "java":
 		return &JavaJudge{Meta: meta, Checker: &DiffChecker{}}, nil
 	case "cpp":
+		return &CppJudge{Meta: meta, Checker: &DiffChecker{}}, nil
 	case "c":
-		return &CppJudge{Meta: meta}, nil
+		return &CppJudge{Meta: meta, Checker: &DiffChecker{}}, nil
 	case "python":
 		return &PythonJudge{Meta: meta}, nil
 	}
