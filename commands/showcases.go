@@ -46,7 +46,7 @@ func GetTestCases(egorMeta config.EgorMeta) []*TestCaseIO {
 func PrintTestCasesTable(testCases []*TestCaseIO) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"#", "Test Name", "Input Path", "Output Path", "Custon"})
+	t.AppendHeader(table.Row{"#", "Test Name", "Input Path", "Output Path", "Custom"})
 	for _, testCase := range testCases {
 		t.AppendRow([]interface{}{
 			testCase.Id,
