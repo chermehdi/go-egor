@@ -127,6 +127,11 @@ func PrintCaseAction(context *cli.Context) error {
 	return nil
 }
 
+// Command to print a test case. this command can be used to print inputs and/or outputs
+// to the consol. The user can choose the print the input only or the output only. The
+// user should provide a valid test id.
+// Running this command will fetch egor meta data, get the Test case with the given id,
+// and then print the content of the input and/or of the output files. 
 var PrintCaseCommand = cli.Command{
 	Name:      "printcase",
 	Aliases:   []string{"pc"},
