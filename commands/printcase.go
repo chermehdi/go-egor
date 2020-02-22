@@ -46,7 +46,6 @@ func GetTestCase(egorMeta config.EgorMeta, id int) *TestCaseIO {
 
 func PrintTestCaseInput(testCase *TestCaseIO) {
 	color.Green("Input:")
-	color.Green("========================================================")
 	file, err := config.OpenFileFromPath(testCase.InputPath)
 	if err != nil {
 		color.Red("Failed to read test case input")
@@ -61,7 +60,6 @@ func PrintTestCaseInput(testCase *TestCaseIO) {
 
 func PrintTestCaseOutput(testCase *TestCaseIO) {
 	color.Green("Output:")
-	color.Green("========================================================")
 	file, err := config.OpenFileFromPath(testCase.OutputPath)
 	if err != nil {
 		color.Red("Failed to read test case input")
