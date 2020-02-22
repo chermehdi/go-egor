@@ -86,7 +86,7 @@ var ConfigCommand = cli.Command{
 	Name:      "config",
 	Aliases:   []string{"c"},
 	Usage:     "Read/Change global configuration parameters",
-	UsageText: "Read/Change global configuraiton parameters",
+	UsageText: "egor config set <config.name> <config.value> | egor config get <config.name?>",
 	Subcommands: []*cli.Command{
 		{
 			Name:      "set",
