@@ -6,22 +6,22 @@ import (
 	"testing"
 )
 
-func createSimpleDummyMetaData() config.EgorMeta{
-	meteData := config.EgorMeta {
-		TaskName:	"Dummy Task",
-		TaskLang: 	"cpp",
-		Inputs: 	[]config.IoFile {
-			config.IoFile {
-				Name: 	"test-0",
-				Path: 	"inputs/test-0.in",
-				Custom:	true, 
-			}, 
-		}, 
-		Outputs: 	[]config.IoFile {
-			config.IoFile {
-				Name: 	"test-0",
-				Path: 	"outputs/test-0.ans",
-				Custom:	true,
+func createSimpleDummyMetaData() config.EgorMeta {
+	meteData := config.EgorMeta{
+		TaskName: "Dummy Task",
+		TaskLang: "cpp",
+		Inputs: []config.IoFile{
+			config.IoFile{
+				Name:   "test-0",
+				Path:   "inputs/test-0.in",
+				Custom: true,
+			},
+		},
+		Outputs: []config.IoFile{
+			config.IoFile{
+				Name:   "test-0",
+				Path:   "outputs/test-0.ans",
+				Custom: true,
 			},
 		},
 	}

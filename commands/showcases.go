@@ -10,11 +10,11 @@ import (
 )
 
 type TestCaseIO struct {
-	Id int
-	Name string
-	InputPath string
+	Id         int
+	Name       string
+	InputPath  string
 	OutputPath string
-	Custom bool
+	Custom     bool
 }
 
 // parse input and output from egor meta to TestCase
@@ -22,12 +22,12 @@ func GetTestCases(egorMeta config.EgorMeta) []*TestCaseIO {
 	testCasesMap := make(map[string]*TestCaseIO)
 	testCases := make([]*TestCaseIO, 0)
 	for _, input := range egorMeta.Inputs {
-		testCase := &TestCaseIO {
-			Id : input.GetId(),
-			Name : input.Name,
-			InputPath : input.Path,
+		testCase := &TestCaseIO{
+			Id:         input.GetId(),
+			Name:       input.Name,
+			InputPath:  input.Path,
 			OutputPath: "",
-			Custom: input.Custom,
+			Custom:     input.Custom,
 		}
 		testCasesMap[input.Name] = testCase
 		testCases = append(testCases, testCase)
@@ -89,7 +89,7 @@ func ShowCasesAction(context *cli.Context) error {
 
 	color.Green("Listing %d testcase(s)...", metaData.CountTestCases())
 	color.Green("")
-	
+
 	PrintTestCases(metaData)
 
 	return nil

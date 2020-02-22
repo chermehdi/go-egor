@@ -54,7 +54,7 @@ func AddNewCaseInput(inputLines []string,
 	if err != nil {
 		return metaData, err
 	}
-	inputFile := config.NewIoFile(inputFileName, path.Join("inputs", inputFileName), true)
+	inputFile := config.NewIoFile(caseName, path.Join("inputs", inputFileName), true)
 	metaData.Inputs = append(metaData.Inputs, inputFile)
 
 	return metaData, nil
@@ -70,7 +70,7 @@ func AddNewCaseOutput(outputLines []string,
 	if err != nil {
 		return metaData, err
 	}
-	outputFile := config.NewIoFile(outputFileName, path.Join("outputs", outputFileName), true)
+	outputFile := config.NewIoFile(caseName, path.Join("outputs", outputFileName), true)
 	metaData.Outputs = append(metaData.Outputs, outputFile)
 
 	return metaData, nil
@@ -133,10 +133,10 @@ func CustomCaseAction(context *cli.Context) error {
 }
 
 // Command to add costum test cases to the current task.
-// Running this command will ask the user to provide their input and output, then 
+// Running this command will ask the user to provide their input and output, then
 // saves the new test case data into appropriate files and add their meta data into
 // the current task egor meta data.
-// The user can add a flag --no-output to specify that this test case have no output 
+// The user can add a flag --no-output to specify that this test case have no output
 // associated with it. The user will not be asked to provide output in this case.
 var CaseCommand = cli.Command{
 	Name:      "case",
