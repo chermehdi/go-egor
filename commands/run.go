@@ -1,11 +1,12 @@
 package commands
 
 import (
-	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
 	"github.com/chermehdi/egor/config"
+	"github.com/fatih/color"
+	"github.com/jedib0t/go-pretty/table"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -23,6 +24,13 @@ var (
 	WA int8 = 3
 )
 
+var (
+	green   = color.New(color.FgGreen).SprintfFunc()
+	red     = color.New(color.FgRed).SprintfFunc()
+	magenta = color.New(color.FgMagenta).SprintfFunc()
+	yellow  = color.New(color.FgYellow).SprintfFunc()
+)
+
 // Checks the output of a given testcase against it's expected output
 type Checker interface {
 	// Execute the check (got, expected) and returns
@@ -36,8 +44,8 @@ type DiffChecker struct {
 
 func (c *DiffChecker) Check(got, expected string) error {
 	// Compare the trimmed output from both input and output
-	if strings.Trim(got, " \t\n\r") != strings.Trim(expected, " \t\n\r") {
-		return errors.New(fmt.Sprintf("Checker failed, expected %s, found %s", got, expected))
+	if strings.TrimRight(got, " \t\n\r") != strings.TrimRight(expected, " \t\n\r") {
+		return errors.New(fmt.Sprintf("Checker failed, expected:\n%s\nfound:\n%s", expected, got))
 	}
 	return nil
 }
@@ -94,21 +102,56 @@ type Judge interface {
 
 // This represents the result of running the testcases of a given task
 type JudgeReport interface {
-	Add(status CaseStatus)
+	// Add the pair To the list of executions processed
+	Add(status CaseStatus, description CaseDescription)
 
-	Display() string
+	// Display the current report to os.Stdout
+	Display()
 }
 
 type ConsoleJudgeReport struct {
 	Stats []CaseStatus
+	Descs []CaseDescription
 }
 
-func (c *ConsoleJudgeReport) Add(status CaseStatus) {
+func (c *ConsoleJudgeReport) Add(status CaseStatus, description CaseDescription) {
 	c.Stats = append(c.Stats, status)
+	c.Descs = append(c.Descs, description)
 }
 
-func (c *ConsoleJudgeReport) Display() string {
-	panic("implement me")
+func getDisplayStatus(status int8) string {
+	switch status {
+	case AC:
+		return green("AC")
+	case RE:
+		return magenta("RE")
+	case SK:
+		return yellow("SK")
+	case WA:
+		return red("WA")
+	}
+	return "Unknown"
+}
+
+func (c *ConsoleJudgeReport) Display() {
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"#", "Test Name", "Status", "Custom", "Additional infos"})
+	for i, stat := range c.Stats {
+		output := "None"
+		if stat.CheckerError != nil {
+			output = fmt.Sprintf("FAILED, %s", stat.CheckerError.Error())
+		}
+		t.AppendRow([]interface{}{
+			i,
+			c.Descs[i].InputFile,
+			getDisplayStatus(stat.Status),
+			c.Descs[i].CustomCase,
+			output,
+		})
+	}
+	t.SetStyle(table.StyleLight)
+	t.Render()
 }
 
 func newJudgeReport() JudgeReport {
@@ -130,14 +173,18 @@ func (judge *JavaJudge) Setup() error {
 		return err
 	}
 	workDirPath := path.Join(currentDir, "work")
-	if err = os.Mkdir(workDirPath, 777); err != nil {
+	if err = os.Mkdir(workDirPath, 0777); err != nil {
 		return err
 	}
 	//TODO(chermehdi): make the executables path configurable #14
-
 	// Compilation for Java
-	cmd := exec.Command("javac", judge.Meta.TaskFile, "-d", workDirPath)
+	var stderrBuffer bytes.Buffer
+	cmd := exec.Command("javac", judge.Meta.TaskFile, "-d", "work")
+	cmd.Dir = currentDir
+	fmt.Printf("javac %s -d \"%s\"\n", judge.Meta.TaskFile, workDirPath)
+	cmd.Stderr = &stderrBuffer
 	if err = cmd.Run(); err != nil {
+		color.Red("Could not  compile %s, Cause: \n", stderrBuffer.String())
 		return err
 	}
 	judge.CurrentWorkDir = workDirPath
@@ -146,8 +193,7 @@ func (judge *JavaJudge) Setup() error {
 
 func (judge *JavaJudge) RunTestCase(desc CaseDescription) CaseStatus {
 	// We suppose that all java executables will be called Main
-	execFilePath := path.Join(judge.CurrentWorkDir, "Main")
-	cmd := exec.Command("java", execFilePath)
+	cmd := exec.Command("java", "Main")
 	cmd.Dir = judge.CurrentWorkDir
 	inputFile, err := os.Open(desc.InputFile)
 	if err != nil {
@@ -169,7 +215,7 @@ func (judge *JavaJudge) RunTestCase(desc CaseDescription) CaseStatus {
 
 	var stderrBuffer bytes.Buffer
 	cmd.Stdin = inputFile
-	cmd.Stdout = bufio.NewWriter(outputFile)
+	cmd.Stdout = outputFile
 	cmd.Stderr = &stderrBuffer
 	if err = cmd.Run(); err != nil {
 		return CaseStatus{
@@ -188,6 +234,7 @@ func (judge *JavaJudge) RunTestCase(desc CaseDescription) CaseStatus {
 		}
 	}
 	output, err := ioutil.ReadFile(desc.WorkFile)
+
 	if err != nil {
 		return CaseStatus{
 			Status:       RE,
@@ -204,7 +251,7 @@ func (judge *JavaJudge) RunTestCase(desc CaseDescription) CaseStatus {
 	}
 	return CaseStatus{
 		Status:       AC,
-		CheckerError: err,
+		CheckerError: nil,
 		Stderr:       stderrBuffer.String(),
 	}
 }
@@ -254,7 +301,7 @@ func (judge *PythonJudge) Cleanup() error {
 func NewJudgeFor(meta config.EgorMeta) (Judge, error) {
 	switch meta.TaskLang {
 	case "java":
-		return &JavaJudge{Meta: meta}, nil
+		return &JavaJudge{Meta: meta, Checker: &DiffChecker{}}, nil
 	case "cpp":
 	case "c":
 		return &CppJudge{Meta: meta}, nil
@@ -265,6 +312,7 @@ func NewJudgeFor(meta config.EgorMeta) (Judge, error) {
 }
 
 func RunAction(_ *cli.Context) error {
+	color.Green("in the run action")
 	configuration, err := config.LoadDefaultConfiguration()
 	if err != nil {
 		return err
@@ -288,12 +336,15 @@ func RunAction(_ *cli.Context) error {
 	}
 	defer judge.Cleanup()
 	report := newJudgeReport()
+
 	for i, input := range egorMeta.Inputs {
 		output := egorMeta.Outputs[i]
 		caseDescription := NewCaseDescription(input, output)
 		status := judge.RunTestCase(*caseDescription)
-		report.Add(status)
+		report.Add(status, *caseDescription)
 	}
+	report.Display()
+	return nil
 }
 
 var TestCommand = cli.Command{
