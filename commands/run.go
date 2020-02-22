@@ -362,19 +362,83 @@ func (judge *CppJudge) Cleanup() error {
 // Python Judge
 //
 type PythonJudge struct {
-	Meta config.EgorMeta
+	Meta           config.EgorMeta
+	CurrentWorkDir string
+	Checker        Checker
 }
 
 func (judge *PythonJudge) Setup() error {
-	panic("implement me")
+	// No setup required for python
+	return nil
 }
 
-func (judge *PythonJudge) RunTestCase(CaseDescription) CaseStatus {
-	panic("implement me")
+func (judge *PythonJudge) RunTestCase(desc CaseDescription) CaseStatus {
+	cmd := exec.Command("python3", "main.py")
+	cmd.Dir = judge.CurrentWorkDir
+	inputFile, err := os.Open(desc.InputFile)
+	if err != nil {
+		return CaseStatus{
+			Status:       RE,
+			CheckerError: nil,
+		}
+	}
+	defer inputFile.Close()
+
+	outputFile, err := os.OpenFile(desc.WorkFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
+	if err != nil {
+		return CaseStatus{
+			Status:       RE,
+			CheckerError: nil,
+		}
+	}
+	defer outputFile.Close()
+
+	var stderrBuffer bytes.Buffer
+	cmd.Stdin = inputFile
+	cmd.Stdout = outputFile
+	cmd.Stderr = &stderrBuffer
+	if err = cmd.Run(); err != nil {
+		return CaseStatus{
+			Status:       RE,
+			CheckerError: nil,
+			Stderr:       stderrBuffer.String(),
+		}
+
+	}
+
+	expectedOutput, err := ioutil.ReadFile(desc.OutputFile)
+	if err != nil {
+		return CaseStatus{
+			Status:       RE,
+			CheckerError: nil,
+		}
+	}
+	output, err := ioutil.ReadFile(desc.WorkFile)
+
+	if err != nil {
+		return CaseStatus{
+			Status:       RE,
+			CheckerError: nil,
+		}
+	}
+	err = judge.Checker.Check(string(output), string(expectedOutput))
+	if err != nil {
+		return CaseStatus{
+			Status:       WA,
+			CheckerError: err,
+			Stderr:       stderrBuffer.String(),
+		}
+	}
+	return CaseStatus{
+		Status:       AC,
+		CheckerError: nil,
+		Stderr:       stderrBuffer.String(),
+	}
 }
 
 func (judge *PythonJudge) Cleanup() error {
-	panic("implement me")
+	// No cleanup required for python
+	return nil
 }
 
 // Creates and returns a Judge implementation corresponding to the given language
@@ -387,7 +451,7 @@ func NewJudgeFor(meta config.EgorMeta) (Judge, error) {
 	case "c":
 		return &CppJudge{Meta: meta, Checker: &DiffChecker{}}, nil
 	case "python":
-		return &PythonJudge{Meta: meta}, nil
+		return &PythonJudge{Meta: meta, Checker: &DiffChecker{}}, nil
 	}
 	return nil, errors.New(fmt.Sprintf("Cannot find judge for the given lang %s", meta.TaskLang))
 }
