@@ -185,7 +185,7 @@ func ParseAction(_ *cli.Context) error {
 var ParseCommand = cli.Command{
 	Name:      "parse",
 	Aliases:   []string{"p"},
-	Usage:     "Parse a task using 'Competitive Companion'",
-	UsageText: "parse task from navigator",
+	Usage:     "parse task from navigator",
+	UsageText: "egor parse",
 	Action:    ParseAction,
 }
