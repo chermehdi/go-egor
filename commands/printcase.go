@@ -73,7 +73,7 @@ func PrintTestCaseOutput(testCase *TestCaseIO) {
 
 func PrintCaseAction(context *cli.Context) error {
 	if context.Bool("input-only") && context.Bool("output-only") {
-		color.Red("--input-only and --output-only cannot be exiting both.")
+		color.Red("only --input-only or --output-only should be set.")
 		return errors.New("Invalid commands arguments")
 	}
 
@@ -85,7 +85,7 @@ func PrintCaseAction(context *cli.Context) error {
 	id, err := strconv.Atoi(context.Args().Get(0))
 
 	if err != nil {
-		color.Red("Cannot parse test id, a number required!")
+		color.Red(fmt.Sprintf("Cannot parse test id = '%s', a number required!", context.Args().Get(0)))
 		return errors.New(fmt.Sprintf("Failed to parse test id = %s", context.Args().Get(0)))
 	}
 
@@ -110,7 +110,7 @@ func PrintCaseAction(context *cli.Context) error {
 	
 	testCase := GetTestCase(metaData, id)
 	if testCase == nil {
-		color.Red("Count not find test case with given id")
+		color.Red(fmt.Sprintf("Could not find test case with id = %d", id))
 		return errors.New(fmt.Sprintf("Unknown test case with id %d", id))
 	}
 
@@ -126,9 +126,9 @@ func PrintCaseAction(context *cli.Context) error {
 }
 
 // Command to print a test case. this command can be used to print inputs and/or outputs
-// to the consol. The user can choose the print the input only or the output only. The
+// to the consol. The user can choose to print the input only or the output only. The
 // user should provide a valid test id.
-// Running this command will fetch egor meta data, get the Test case with the given id,
+// Running this command will fetch egor meta data, get the test case with the given id,
 // and then print the content of the input and/or of the output files. 
 var PrintCaseCommand = cli.Command{
 	Name:      "printcase",
