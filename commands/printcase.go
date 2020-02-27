@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/urfave/cli/v2"
 	"github.com/chermehdi/egor/config"
+	"github.com/chermehdi/egor/utils"
 	"github.com/fatih/color"	
 	"os"
 	"path"
@@ -45,11 +46,12 @@ func GetTestCase(egorMeta config.EgorMeta, id int) *TestCaseIO {
 }
 
 func PrintTestCaseInput(testCase *TestCaseIO) {
-	color.Green("Input:")
+	
 	file, err := config.OpenFileFromPath(testCase.InputPath)
 	if err != nil {
 		color.Red("Failed to read test case input")
 	} else {
+		color.Green(utils.GetHeader("Input", "========", 10))
 		scanner := bufio.NewScanner(file)
 		for scanner.Scan() {
 			fmt.Println(scanner.Text())
@@ -59,11 +61,11 @@ func PrintTestCaseInput(testCase *TestCaseIO) {
 }
 
 func PrintTestCaseOutput(testCase *TestCaseIO) {
-	color.Green("Output:")
 	file, err := config.OpenFileFromPath(testCase.OutputPath)
 	if err != nil {
 		color.Red("Failed to read test case input")
 	} else {
+		color.Green(utils.GetHeader("Output", "========", 10))
 		scanner := bufio.NewScanner(file)
 		for scanner.Scan() {
 			fmt.Println(scanner.Text())
