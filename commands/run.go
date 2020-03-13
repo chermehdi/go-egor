@@ -249,8 +249,10 @@ func (judge *JavaJudge) Setup() error {
 		return err
 	}
 	workDirPath := path.Join(currentDir, "work")
-	if err = os.Mkdir(workDirPath, 0777); err != nil {
-		return err
+	if _, err = os.Stat(workDirPath); os.IsNotExist(err) {
+		if err := os.Mkdir(workDirPath, 0777); err != nil {
+			return err
+		}
 	}
 	//TODO(chermehdi): make the executables path configurable #14
 	// Compilation for Java
@@ -299,8 +301,10 @@ func (judge *CppJudge) Setup() error {
 		return err
 	}
 	workDirPath := path.Join(currentDir, "work")
-	if err = os.Mkdir(workDirPath, 0777); err != nil {
-		return err
+	if _, err = os.Stat(workDirPath); os.IsNotExist(err) {
+		if err := os.Mkdir(workDirPath, 0777); err != nil {
+			return err
+		}
 	}
 	var stderrBuffer bytes.Buffer
 	cmd := exec.Command("g++", judge.Meta.TaskFile, "-o", "work/sol")
