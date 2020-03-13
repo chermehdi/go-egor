@@ -30,7 +30,7 @@ func createSimpleDummyMetaData() config.EgorMeta {
 }
 
 func TestGetTestCases(t *testing.T) {
-	metaData := createDummyMetaData()
+	metaData := createSimpleDummyMetaData()
 	testCases := GetTestCases(metaData)
 	inputs := metaData.Inputs
 	outputs := metaData.Outputs
