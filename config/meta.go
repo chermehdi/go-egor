@@ -8,21 +8,21 @@ import (
 	"io"
 	"os"
 	"path"
-	"strings"	
 	"strconv"
+	"strings"
 )
 
 type IoFile struct {
-	Name   		string
-	Path   		string
-	Custom 		bool
+	Name   string
+	Path   string
+	Custom bool
 }
 
 func NewIoFile(fileName, filePath string, customCase bool) IoFile {
 	return IoFile{
-		Name:   	fileName,
-		Path:   	filePath,
-		Custom: 	customCase,
+		Name:   fileName,
+		Path:   filePath,
+		Custom: customCase,
 	}
 }
 
@@ -30,7 +30,7 @@ func (ioFile *IoFile) GetId() int {
 	tokens := strings.Split(ioFile.Name, "-")
 	id, err := strconv.Atoi(tokens[1])
 	if err != nil {
-		return 0 
+		return 0
 	}
 	return id
 }

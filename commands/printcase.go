@@ -1,15 +1,15 @@
 package commands
 
 import (
+	"bufio"
 	"errors"
-	"github.com/urfave/cli/v2"
+	"fmt"
 	"github.com/chermehdi/egor/config"
 	"github.com/chermehdi/egor/utils"
-	"github.com/fatih/color"	
+	"github.com/fatih/color"
+	"github.com/urfave/cli/v2"
 	"os"
 	"path"
-	"fmt"
-	"bufio"
 	"strconv"
 )
 
@@ -17,12 +17,12 @@ func GetTestCase(egorMeta config.EgorMeta, id int) *TestCaseIO {
 	var testCase *TestCaseIO
 	for _, input := range egorMeta.Inputs {
 		if input.GetId() == id {
-			testCase = &TestCaseIO {
-				Id : input.GetId(),
-				Name : input.Name,
-				InputPath : input.Path,
+			testCase = &TestCaseIO{
+				Id:         input.GetId(),
+				Name:       input.Name,
+				InputPath:  input.Path,
 				OutputPath: "",
-				Custom: input.Custom,
+				Custom:     input.Custom,
 			}
 
 			break
@@ -32,12 +32,12 @@ func GetTestCase(egorMeta config.EgorMeta, id int) *TestCaseIO {
 	if testCase == nil {
 		return nil
 	}
-	 
+
 	for _, output := range egorMeta.Outputs {
 		if output.Name == testCase.Name {
 			testCase.OutputPath = output.Path
 		}
-	} 
+	}
 
 	if testCase == nil {
 		return nil
@@ -46,7 +46,7 @@ func GetTestCase(egorMeta config.EgorMeta, id int) *TestCaseIO {
 }
 
 func PrintTestCaseInput(testCase *TestCaseIO) {
-	
+
 	file, err := config.OpenFileFromPath(testCase.InputPath)
 	if err != nil {
 		color.Red("Failed to read test case input")
@@ -57,7 +57,7 @@ func PrintTestCaseInput(testCase *TestCaseIO) {
 			fmt.Println(scanner.Text())
 		}
 	}
-	
+
 }
 
 func PrintTestCaseOutput(testCase *TestCaseIO) {
@@ -109,7 +109,7 @@ func PrintCaseAction(context *cli.Context) error {
 		color.Red("Failed to load egor MetaData ")
 		return err
 	}
-	
+
 	testCase := GetTestCase(metaData, id)
 	if testCase == nil {
 		color.Red(fmt.Sprintf("Could not find test case with id = %d", id))
@@ -123,7 +123,7 @@ func PrintCaseAction(context *cli.Context) error {
 	if !context.Bool("input-only") {
 		PrintTestCaseOutput(testCase)
 	}
-	
+
 	return nil
 }
 
@@ -131,7 +131,7 @@ func PrintCaseAction(context *cli.Context) error {
 // to the consol. The user can choose to print the input only or the output only. The
 // user should provide a valid test id.
 // Running this command will fetch egor meta data, get the test case with the given id,
-// and then print the content of the input and/or of the output files. 
+// and then print the content of the input and/or of the output files.
 var PrintCaseCommand = cli.Command{
 	Name:      "printcase",
 	Aliases:   []string{"pc"},

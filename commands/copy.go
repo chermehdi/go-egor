@@ -1,17 +1,17 @@
 package commands
 
 import (
-	"github.com/urfave/cli/v2"
+	"fmt"
+	"github.com/atotto/clipboard"
 	"github.com/chermehdi/egor/config"
 	"github.com/fatih/color"
-	"github.com/atotto/clipboard"
+	"github.com/urfave/cli/v2"
+	"io/ioutil"
 	"os"
 	"path"
-	"io/ioutil"
-	"fmt"
 )
 
-// Load the content of a given file 
+// Load the content of a given file
 func GetFileContent(filePath string) (string, error) {
 	filebytes, err := ioutil.ReadFile(filePath)
 	if err != nil {
