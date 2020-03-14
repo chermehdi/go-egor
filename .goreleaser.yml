@@ -4,8 +4,10 @@ before:
     - go mod download
 
 builds:
-- env:
-  - CGO_ENABLED=0
+  -
+    binary: egor
+    env:
+      - CGO_ENABLED=0
 archives:
 - replacements:
     darwin: Darwin
