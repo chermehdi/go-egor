@@ -65,7 +65,7 @@ func CopyAction(context *cli.Context) error {
 var CopyCommand = cli.Command{
 	Name:      "copy",
 	Aliases:   []string{"cp"},
-	Usage:     "copy task file into clipboad",
-	UsageText: "list meta data about of the tests cases in the current task",
+	Usage:     "Copy task file into clipboard",
+	UsageText: "Copy task file into clipboard",
 	Action:    CopyAction,
 }

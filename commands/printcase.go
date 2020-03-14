@@ -135,8 +135,8 @@ func PrintCaseAction(context *cli.Context) error {
 var PrintCaseCommand = cli.Command{
 	Name:      "printcase",
 	Aliases:   []string{"pc"},
-	Usage:     "print input and/or output of a given test case",
-	UsageText: "print input and/or output of a given test case",
+	Usage:     "Print input and/or output of a given test case",
+	UsageText: "Print input and/or output of a given test case",
 	Action:    PrintCaseAction,
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
