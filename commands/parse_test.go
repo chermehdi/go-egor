@@ -83,7 +83,8 @@ func TestCreateDirectoryStructure(t *testing.T) {
 		Version:        "1.0",
 		Author:         "MaxHeap",
 	}
-	rootDir := os.TempDir()
+	rootDir := path.Join(os.TempDir(), "egor")
+	CreateDirectory(rootDir)
 	defer DeleteDir(rootDir)
 
 	_, err := CreateDirectoryStructure(task, configuration, rootDir)
@@ -98,3 +99,12 @@ func TestCreateDirectoryStructure(t *testing.T) {
 	assert.FileExists(t, path.Join(taskDir, "inputs", "test-0.in"))
 	assert.FileExists(t, path.Join(taskDir, "outputs", "test-0.ans"))
 }
+
+func CreateDirectory(path string) error {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		if err := os.Mkdir(path, 0777); err != nil {
+			return err
+		}
+	}
+	return nil
+} 
