@@ -31,6 +31,8 @@ var (
 	yellow  = color.New(color.FgYellow).SprintfFunc()
 )
 
+const WorkDir = "work"
+
 // Checks the output of a given testcase against it's expected output
 type Checker interface {
 	// Execute the check (got, expected) and returns
@@ -84,15 +86,15 @@ type CaseStatus struct {
 	Stderr       string
 }
 
-// Implementation must be able to prepare the working environement to compile and execute testscases,
+// Implementation must be able to prepare the working environment to compile and execute testscases,
 // And run each testcase and report the status back to the invoker, and perform any necessary cleanup (binaries created, directories created ...)
 type Judge interface {
 	// setup the working directory and perform any necessary compilation of the task
 	// if the setup returned an error, the Judge should abort the operation and report the error back.
 	Setup() error
 
-	// Run on every testcase, and the status is reported back to the invoker.
-	// The implementation is free to Run all testcases at once, or report every testcase execution status once it finishes.
+	// Run on every test case, and the status is reported back to the invoker.
+	// The implementation is free to Run all testcases at once, or report every test case execution status once it finishes.
 	// If it's needed, running independent cases can be done on different go routines.
 	RunTestCase(CaseDescription) CaseStatus
 
@@ -101,6 +103,7 @@ type Judge interface {
 
 	// Return the working directory of the judge
 	WorkDir() string
+
 	// Cleanup the working directory, if an error occured, implementation must report it to the caller.
 	Cleanup() error
 }
@@ -144,10 +147,17 @@ func getDisplayStatus(status int8) string {
 	return "Unknown"
 }
 
+func getStderrDisplay(stderr string) string {
+	if stderr == "" {
+		return "-"
+	}
+	return red(stderr)
+}
+
 func (c *ConsoleJudgeReport) Display() {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"#", "Test Name", "Status", "Custom", "Additional infos"})
+	t.AppendHeader(table.Row{"#", "Test Name", "Status", "Custom", "Additional infos", "Stderr"})
 	for i, stat := range c.Stats {
 		output := "None"
 		if stat.CheckerError != nil {
@@ -159,6 +169,7 @@ func (c *ConsoleJudgeReport) Display() {
 			getDisplayStatus(stat.Status),
 			c.Descs[i].CustomCase,
 			output,
+			getStderrDisplay(stat.Stderr),
 		})
 	}
 	t.SetStyle(table.StyleLight)
@@ -248,7 +259,7 @@ func (judge *JavaJudge) Setup() error {
 	if err != nil {
 		return err
 	}
-	workDirPath := path.Join(currentDir, "work")
+	workDirPath := path.Join(currentDir, WorkDir)
 	if _, err = os.Stat(workDirPath); os.IsNotExist(err) {
 		if err := os.Mkdir(workDirPath, 0777); err != nil {
 			return err
@@ -257,7 +268,7 @@ func (judge *JavaJudge) Setup() error {
 	//TODO(chermehdi): make the executables path configurable #14
 	// Compilation for Java
 	var stderrBuffer bytes.Buffer
-	cmd := exec.Command("javac", judge.Meta.TaskFile, "-d", "work")
+	cmd := exec.Command("javac", judge.Meta.TaskFile, "-d", WorkDir)
 	cmd.Dir = currentDir
 	cmd.Stderr = &stderrBuffer
 	if err = cmd.Run(); err != nil {
@@ -300,7 +311,7 @@ func (judge *CppJudge) Setup() error {
 	if err != nil {
 		return err
 	}
-	workDirPath := path.Join(currentDir, "work")
+	workDirPath := path.Join(currentDir, WorkDir)
 	if _, err = os.Stat(workDirPath); os.IsNotExist(err) {
 		if err := os.Mkdir(workDirPath, 0777); err != nil {
 			return err
