@@ -46,7 +46,7 @@ func GetTestCases(egorMeta config.EgorMeta) []*TestCaseIO {
 func PrintTestCasesTable(testCases []*TestCaseIO) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"#", "Test Name", "Input Path", "Output Path", "Custon"})
+	t.AppendHeader(table.Row{"#", "Test Name", "Input Path", "Output Path", "Custom"})
 	for _, testCase := range testCases {
 		t.AppendRow([]interface{}{
 			testCase.Id,
@@ -67,7 +67,7 @@ func PrintTestCases(egorMeta config.EgorMeta) {
 
 // list test cases information command action
 // TODO(Eroui): [Refactoring] Duplicate code while loading meta data, consider refactoring...
-func ShowCasesAction(context *cli.Context) error {
+func ShowCasesAction(_ *cli.Context) error {
 	cwd, err := os.Getwd()
 	if err != nil {
 		color.Red("Failed to list test cases!")
@@ -101,7 +101,7 @@ func ShowCasesAction(context *cli.Context) error {
 var ShowCasesCommand = cli.Command{
 	Name:      "showcases",
 	Aliases:   []string{"sc"},
-	Usage:     "list information about test cases",
-	UsageText: "list meta data about of the tests cases in the current task",
+	Usage:     "list meta data about of the tests cases in the current task",
+	UsageText: "egor showcases",
 	Action:    ShowCasesAction,
 }

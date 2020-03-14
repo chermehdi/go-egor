@@ -35,7 +35,7 @@ func writeLinesToFile(filename string, lines []string) error {
 	}
 
 	for _, line := range lines {
-		fmt.Fprintln(f, line)
+		_, err := fmt.Fprintln(f, line)
 		if err != nil {
 			return err
 		}
@@ -121,7 +121,7 @@ func CustomCaseAction(context *cli.Context) error {
 		}
 	}
 
-	metaData.SaveToFile(path.Join(cwd, configFileName))
+	err = metaData.SaveToFile(path.Join(cwd, configFileName))
 
 	if err != nil {
 		color.Red("Failed to save to MetaData")
@@ -141,8 +141,8 @@ func CustomCaseAction(context *cli.Context) error {
 var CaseCommand = cli.Command{
 	Name:      "case",
 	Aliases:   []string{"tc", "testcase"},
-	Usage:     "Create a custom test case.",
-	UsageText: "Add custom test cases to egor task.",
+	UsageText: "egor case <--no-output?>",
+	Usage:     "Add custom test cases to egor task.",
 	Action:    CustomCaseAction,
 	Flags: []cli.Flag{
 		&cli.BoolFlag{

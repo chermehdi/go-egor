@@ -20,20 +20,20 @@ func getDefaultConfiguration() *config.Config {
 }
 
 func TestSetConfiguration(t *testing.T) {
-	config := getDefaultConfiguration()
+	configuration := getDefaultConfiguration()
 
-	UpdateConfiguration(config, "server.port", "1245")
+	_ = UpdateConfiguration(configuration, "server.port", "1245")
 
-	assert.Equal(t, config.Server.Port, 1245)
-	assert.Equal(t, config.Lang.Default, "cpp")
+	assert.Equal(t, configuration.Server.Port, 1245)
+	assert.Equal(t, configuration.Lang.Default, "cpp")
 
-	UpdateConfiguration(config, "lang.default", "java")
-	assert.Equal(t, config.Lang.Default, "java")
+	_ = UpdateConfiguration(configuration, "lang.default", "java")
+	assert.Equal(t, configuration.Lang.Default, "java")
 }
 
 func TestSetConfigurationUnknownKey(t *testing.T) {
-	config := getDefaultConfiguration()
-	err := UpdateConfiguration(config, "unkown.key", "123")
+	configuration := getDefaultConfiguration()
+	err := UpdateConfiguration(configuration, "unkown.key", "123")
 
 	assert.Error(t, err, "Error should be returned if the key is unknown")
 }
