@@ -46,7 +46,7 @@ func createDefaultConfiguration() *Config {
 		}{
 			Default: "cpp",
 		},
-		Version:        "1.0",
+		Version:        "0.1.0",
 		ConfigFileName: "egor-meta.json",
 	}
 }
