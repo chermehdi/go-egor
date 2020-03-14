@@ -30,7 +30,6 @@ func SerializeTask(meta EgorMeta) (string, error) {
 	return buffer.String(), nil
 }
 
-
 func CreateDirectoryStructure(task Task, config Config, rootDir string) (string, error) {
 	taskDir := path.Join(rootDir, task.Name)
 	if err := os.Mkdir(taskDir, 0777); err != nil {
