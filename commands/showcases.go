@@ -101,7 +101,7 @@ func ShowCasesAction(_ *cli.Context) error {
 var ShowCasesCommand = cli.Command{
 	Name:      "showcases",
 	Aliases:   []string{"sc"},
-	Usage:     "list meta data about of the tests cases in the current task",
+	Usage:     "list meta data about tests cases in the current task",
 	UsageText: "egor showcases",
 	Action:    ShowCasesAction,
 }

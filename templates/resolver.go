@@ -16,7 +16,7 @@ const CppTemplate = `
 #include <set>
 #include <map>
 #include <algorithm>
-#include <math>
+#include <cmath>
 
 using namespace std;
 
@@ -32,7 +32,7 @@ import java.io.*;
  * Made by egor https://github.com/chermehdi/egor.
  * {{if .Author }}
  * @author {{ .Author }}
-   {{end}}
+ * {{end}}
  */
 public class Main {
 
@@ -52,9 +52,9 @@ public class Main {
 const PythonTemplate = `
 #
 # Created by egor http://github.com/chermehdi/egor
-{{if .Author }}
+# {{if .Author }}
 # @author {{ .Author }}
-{{end}}
+# {{end}}
 `
 
 func ResolveTemplateByLanguage(lang string) (string, error) {
