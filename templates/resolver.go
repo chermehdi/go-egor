@@ -5,8 +5,7 @@ import (
 	"fmt"
 )
 
-const CppTemplate = `
-//
+const CppTemplate = `//
 // Created by egor http://github.com/chermehdi/egor
 // {{if .Author }}
 // @author {{ .Author }}
@@ -24,8 +23,7 @@ int main() {
 
 }
 `
-const JavaTemplate = `
-import java.util.*;
+const JavaTemplate = `import java.util.*;
 import java.io.*;
 
 /**
@@ -36,21 +34,49 @@ import java.io.*;
  */
 public class Main {
 
-    void solve(Scanner in, PrintWriter out) {
+	void solve(InputReader in, PrintWriter out) {
 
-    }
+	}
 
-    public static void main(String[] args) {
-        try(Scanner in = new Scanner(System.in);
-            PrintWriter out = new PrintWriter(System.out)) {
-            new Main().solve(in, out);
-        }
-    }
+	public static void main(String[] args) throws Exception {
+		InputReader in = new InputReader(System.in);
+		PrintWriter out = new PrintWriter(System.out);
+		Main solver = new Main();
+		solver.solve(in, out);
+		out.close();
+	}
+	
+	static class InputReader {
+		BufferedReader in;
+		StringTokenizer st;
+	
+		public InputReader(InputStream is) {
+			in = new BufferedReader(new InputStreamReader(is));
+		}
+	
+		public String next() {
+			try {
+				while (st == null || !st.hasMoreTokens()) {
+					st = new StringTokenizer(in.readLine());
+				}
+				return st.nextToken();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+	
+		public int nextInt() {
+			return Integer.parseInt(next());
+		}
+	
+		public long nextLong() {
+			return Long.parseLong(next());
+		}
+	}
 }
 `
 
-const PythonTemplate = `
-#
+const PythonTemplate = `#
 # Created by egor http://github.com/chermehdi/egor
 # {{if .Author }}
 # @author {{ .Author }}
