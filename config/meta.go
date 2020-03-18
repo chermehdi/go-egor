@@ -45,6 +45,7 @@ type EgorMeta struct {
 	Inputs   []IoFile
 	Outputs  []IoFile
 	TaskFile string
+	TimeLimit float64
 }
 
 // Resolves the task file given the default language.
@@ -80,6 +81,7 @@ func NewEgorMeta(task Task, config Config) EgorMeta {
 		Inputs:   inputs,
 		Outputs:  outputs,
 		TaskFile: taskFile,
+		TimeLimit: task.TimeLimit,
 	}
 }
 

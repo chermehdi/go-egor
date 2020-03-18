@@ -13,6 +13,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/urfave/cli/v2"
 )
@@ -22,6 +23,12 @@ var (
 	SK int8 = 1
 	RE int8 = 2
 	WA int8 = 3
+	TL int8 = 4
+)
+
+var (
+	OK int8 = 0 // OK execution status
+	TO int8 = 1 // Timed out status
 )
 
 var (
@@ -58,6 +65,7 @@ type CaseDescription struct {
 	OutputFile string
 	WorkFile   string
 	CustomCase bool
+	TimeLimit  float64
 }
 
 func getWorkFile(fileName string) string {
@@ -67,7 +75,7 @@ func getWorkFile(fileName string) string {
 }
 
 // Creates a new CaseDescription from a pair of input and output IoFiles
-func NewCaseDescription(input, output config.IoFile) *CaseDescription {
+func NewCaseDescription(input, output config.IoFile, timeLimit float64) *CaseDescription {
 	base, file := filepath.Split(input.Path)
 	workFilePath := path.Join(base, getWorkFile(file))
 	return &CaseDescription{
@@ -75,6 +83,7 @@ func NewCaseDescription(input, output config.IoFile) *CaseDescription {
 		OutputFile: output.Path,
 		WorkFile:   workFilePath,
 		CustomCase: input.Custom,
+		TimeLimit: timeLimit,
 	}
 }
 
@@ -143,6 +152,8 @@ func getDisplayStatus(status int8) string {
 		return yellow("SK")
 	case WA:
 		return red("WA")
+	case TL:
+		return red("TL") // TODO(Eroui): Add another color?
 	}
 	return "Unknown"
 }
@@ -180,6 +191,22 @@ func newJudgeReport() JudgeReport {
 	return &ConsoleJudgeReport{Stats: []CaseStatus{}}
 }
 
+
+func timedExecution(cmd *exec.Cmd, timeOut float64) (int8, error) {
+	cmd.Start()
+	done := make(chan error)
+	go func() { done <- cmd.Wait() }()
+
+	timeout := time.After(time.Duration(timeOut) * time.Millisecond)
+	select {
+	case <- timeout:
+		cmd.Process.Kill()
+		return TO, nil
+	case err := <-done:
+		return OK, err
+	}
+}
+
 // Utility function to execute the given command that is associated with the given judge
 // the method returns the case status and the error (if any)
 func execute(judge Judge, desc CaseDescription, command string, args ...string) (CaseStatus, error) {
@@ -207,7 +234,17 @@ func execute(judge Judge, desc CaseDescription, command string, args ...string) 
 	cmd.Stdin = inputFile
 	cmd.Stdout = outputFile
 	cmd.Stderr = &stderrBuffer
-	if err = cmd.Run(); err != nil {
+
+	status, err := timedExecution(cmd, desc.TimeLimit)
+	if status == TO {
+	 	return CaseStatus{
+			Status:       TL,
+			CheckerError: nil,
+			Stderr:       stderrBuffer.String(),
+		}, nil
+	}
+
+	if err != nil {
 		return CaseStatus{
 			Status:       RE,
 			CheckerError: nil,
@@ -420,7 +457,7 @@ func RunAction(_ *cli.Context) error {
 
 	for i, input := range egorMeta.Inputs {
 		output := egorMeta.Outputs[i]
-		caseDescription := NewCaseDescription(input, output)
+		caseDescription := NewCaseDescription(input, output, egorMeta.TimeLimit)
 		status := judge.RunTestCase(*caseDescription)
 		report.Add(status, *caseDescription)
 	}
