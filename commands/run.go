@@ -84,7 +84,7 @@ func NewCaseDescription(input, output config.IoFile, timeLimit float64) *CaseDes
 		OutputFile: output.Path,
 		WorkFile:   workFilePath,
 		CustomCase: input.Custom,
-		TimeLimit: timeLimit,
+		TimeLimit:  timeLimit,
 	}
 }
 
@@ -192,7 +192,6 @@ func newJudgeReport() JudgeReport {
 	return &ConsoleJudgeReport{Stats: []CaseStatus{}}
 }
 
-
 func timedExecution(cmd *exec.Cmd, timeOut float64) (int8, error) {
 	cmd.Start()
 	done := make(chan error)
@@ -200,7 +199,7 @@ func timedExecution(cmd *exec.Cmd, timeOut float64) (int8, error) {
 
 	timeout := time.After(time.Duration(timeOut) * time.Millisecond)
 	select {
-	case <- timeout:
+	case <-timeout:
 		cmd.Process.Kill()
 		return TO, nil
 	case err := <-done:
@@ -238,7 +237,7 @@ func execute(judge Judge, desc CaseDescription, command string, args ...string) 
 
 	status, err := timedExecution(cmd, desc.TimeLimit)
 	if status == TO {
-	 	return CaseStatus{
+		return CaseStatus{
 			Status:       TL,
 			CheckerError: nil,
 			Stderr:       stderrBuffer.String(),
