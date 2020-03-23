@@ -57,6 +57,19 @@ const PythonTemplate = `
 # {{end}}
 `
 
+const GolangTemplate = `
+package main
+
+/**
+ * Made by egor https://github.com/chermehdi/egor.
+ * {{if .Author }}
+ * @author {{ .Author }}
+ * {{end}}
+ */
+func main() {
+
+}
+`
 func ResolveTemplateByLanguage(lang string) (string, error) {
 	switch lang {
 	case "cpp":
@@ -65,6 +78,8 @@ func ResolveTemplateByLanguage(lang string) (string, error) {
 		return JavaTemplate, nil
 	case "python":
 		return PythonTemplate, nil
+	case "golang":
+		return GolangTemplate, nil
 	default:
 		return "", errors.New(fmt.Sprintf("Unknown language %s provided", lang))
 	}

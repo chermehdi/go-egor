@@ -378,17 +378,50 @@ func (judge *PythonJudge) Cleanup() error {
 	return nil
 }
 
+
+//
+// Golang Judge
+//
+type GolangJudge struct {
+	Meta           config.EgorMeta
+	CurrentWorkDir string
+	checker        Checker
+}
+
+func (judge *GolangJudge) Setup() error {
+	// No setup required for Golang ^1.13
+	return nil
+}
+
+func (judge *GolangJudge) Checker() Checker {
+	return judge.checker
+}
+
+func (judge *GolangJudge) WorkDir() string {
+	return judge.CurrentWorkDir
+}
+
+func (judge *GolangJudge) RunTestCase(desc CaseDescription) CaseStatus {
+	caseStatus, _ := execute(judge, desc, "go", "run", "main.go")
+	return caseStatus
+}
+
+func (judge *GolangJudge) Cleanup() error {
+	//No cleanup required
+	return nil
+}
+
 // Creates and returns a Judge implementation corresponding to the given language
 func NewJudgeFor(meta config.EgorMeta) (Judge, error) {
 	switch meta.TaskLang {
 	case "java":
 		return &JavaJudge{Meta: meta, checker: &DiffChecker{}}, nil
-	case "cpp":
-		return &CppJudge{Meta: meta, checker: &DiffChecker{}}, nil
-	case "c":
+	case "c", "cpp":
 		return &CppJudge{Meta: meta, checker: &DiffChecker{}}, nil
 	case "python":
 		return &PythonJudge{Meta: meta, checker: &DiffChecker{}}, nil
+	case "golang":
+		return &GolangJudge{Meta: meta, checker: &DiffChecker{}}, nil
 	}
 	return nil, errors.New(fmt.Sprintf("Cannot find judge for the given lang %s", meta.TaskLang))
 }

@@ -55,6 +55,8 @@ func GetTaskName(config Config) (string, error) {
 		return "Main.java", nil
 	} else if config.Lang.Default == "python" {
 		return "main.py", nil
+	} else if config.Lang.Default == "golang" {
+		return "main.go", nil
 	} else {
 		return "", errors.New(fmt.Sprintf("Unknown default language %s, please edit your settings", config.Lang.Default))
 	}

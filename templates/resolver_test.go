@@ -24,6 +24,12 @@ func TestResolveTemplateByLanguageCpp(t *testing.T) {
 	assert.Equal(t, CppTemplate, temp)
 }
 
+func TestResolveTemplateByLanguageGolang(t *testing.T) {
+	temp, err := ResolveTemplateByLanguage("golang")
+	assert.NoError(t, err)
+	assert.Equal(t, GolangTemplate, temp)
+}
+
 func TestResolveTemplateByLanguageUnknow(t *testing.T) {
 	temp, err := ResolveTemplateByLanguage("dummy")
 	assert.Error(t, err)
