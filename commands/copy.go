@@ -42,9 +42,9 @@ func CopyAction(*cli.Context) error {
 		return err
 	}
 	var taskFile string
-	//TODO(chermehdi): make the test on weather we have library location set in the configuration object.
+
 	// TODO(chermehdi): the name of the generated file should be in a unique location
-	if (metaData.TaskLang == "cpp" || metaData.TaskLang == "c") && configuration.LibraryLocation != "" {
+	if (metaData.TaskLang == "cpp" || metaData.TaskLang == "c") && configuration.HasCppLibrary() {
 		taskFile = "main_gen.cpp"
 	} else {
 		taskFile = metaData.TaskFile

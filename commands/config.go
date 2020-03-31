@@ -25,7 +25,7 @@ func UpdateConfiguration(config *config.Config, key, value string) error {
 	} else if lowerKey == "author" {
 		config.Author = value
 	} else if lowerKey == "cpp.lib.location" {
-		config.LibraryLocation = value
+		config.CppLibraryLocation = value
 	} else {
 		// Unknow key
 		return errors.New(fmt.Sprintf("Unknown configuration property %s", key))
@@ -73,7 +73,7 @@ func GetAction(context *cli.Context) error {
 		color.Green("server.port     \t\t %d\n", configuration.Server.Port)
 		color.Green("lang.default    \t\t %s\n", configuration.Lang.Default)
 		color.Green("author          \t\t %s\n", configuration.Author)
-		color.Green("cpp.lib.location\t\t %s\n", configuration.LibraryLocation)
+		color.Green("cpp.lib.location\t\t %s\n", configuration.CppLibraryLocation)
 		return nil
 	} else {
 		value, err := config.GetConfigurationValue(configuration, context.Args().First())

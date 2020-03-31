@@ -67,3 +67,13 @@ func TestGetConfigurationValue(t *testing.T) {
 	_, err = GetConfigurationValue(config, "unknown.key")
 	assert.Error(t, err, "An error is returned if the configuration key is not known")
 }
+
+func TestConfig_HasCppLibrary(t *testing.T) {
+	config := &Config{
+		CppLibraryLocation: "/include",
+	}
+	assert.True(t, config.HasCppLibrary())
+
+	config = &Config{}
+	assert.False(t, config.HasCppLibrary())
+}

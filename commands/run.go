@@ -306,6 +306,7 @@ type CppJudge struct {
 	CurrentWorkDir string
 	checker        Checker
 	LibraryLocation string
+	hasLibrary bool
 }
 
 func (judge *CppJudge) getGenFilePath() string {
@@ -313,8 +314,7 @@ func (judge *CppJudge) getGenFilePath() string {
 }
 
 func (judge *CppJudge) hasLibraryLocation() bool {
-	// TODO(chermehdi): probably will need some more intelligent check.
-	return judge.LibraryLocation != ""
+	return judge.hasLibrary
 }
 
 // Compiles the given fileName in the given working directory
@@ -424,9 +424,8 @@ func NewJudgeFor(meta config.EgorMeta, configuration *config.Config) (Judge, err
 	case "java":
 		return &JavaJudge{Meta: meta, checker: &DiffChecker{}}, nil
 	case "cpp":
-		return &CppJudge{Meta: meta, checker: &DiffChecker{}, LibraryLocation: configuration.LibraryLocation}, nil
 	case "c":
-		return &CppJudge{Meta: meta, checker: &DiffChecker{}, LibraryLocation: configuration.LibraryLocation}, nil
+		return &CppJudge{Meta: meta, checker: &DiffChecker{}, hasLibrary: configuration.HasCppLibrary(), LibraryLocation: configuration.CppLibraryLocation}, nil
 	case "python":
 		return &PythonJudge{Meta: meta, checker: &DiffChecker{}}, nil
 	}
