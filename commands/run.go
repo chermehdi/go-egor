@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/chermehdi/egor/config"
+	"github.com/chermehdi/skimo/skimo"
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/table"
 	"io/ioutil"
@@ -304,6 +305,30 @@ type CppJudge struct {
 	Meta           config.EgorMeta
 	CurrentWorkDir string
 	checker        Checker
+	LibraryLocation string
+}
+
+func (judge *CppJudge) getGenFilePath() string {
+	return "main_gen.cpp"
+}
+
+func (judge *CppJudge) hasLibraryLocation() bool {
+	// TODO(chermehdi): probably will need some more intelligent check.
+	return judge.LibraryLocation != ""
+}
+
+// Compiles the given fileName in the given working directory
+// We expect fileName to be: main.cpp or main_gen.cpp.
+func (judge *CppJudge) compile(currentDir, fileName string) error {
+	var stderrBuffer bytes.Buffer
+	cmd := exec.Command("g++", "--std=c++14",  fileName, "-o", "work/sol")
+	cmd.Dir = currentDir
+	cmd.Stderr = &stderrBuffer
+	if err := cmd.Run(); err != nil {
+		color.Red("Could not  compile, Cause: \n%s", stderrBuffer.String())
+		return err
+	}
+	return nil
 }
 
 func (judge *CppJudge) Setup() error {
@@ -317,13 +342,28 @@ func (judge *CppJudge) Setup() error {
 			return err
 		}
 	}
-	var stderrBuffer bytes.Buffer
-	cmd := exec.Command("g++", judge.Meta.TaskFile, "-o", "work/sol")
-	cmd.Dir = currentDir
-	cmd.Stderr = &stderrBuffer
-	if err = cmd.Run(); err != nil {
-		color.Red("Could not  compile, Cause: \n%s", stderrBuffer.String())
-		return err
+	if judge.hasLibraryLocation() {
+		inliner, _ := skimo.NewInliner(judge.LibraryLocation, false, []string{""})
+		file, err := os.Open(judge.Meta.TaskFile)
+		defer file.Close()
+		if err != nil {
+			return err
+		}
+		content, err := inliner.Inline(file)
+		if err != nil {
+			return err
+		}
+		err = ioutil.WriteFile(judge.getGenFilePath(), []byte(content), 0755)
+		if err != nil {
+			return err
+		}
+		if err := judge.compile(currentDir, judge.getGenFilePath()); err != nil {
+			return err
+		}
+	}else {
+		if err := judge.compile(currentDir, judge.Meta.TaskFile); err != nil {
+				return err
+		}
 	}
 	judge.CurrentWorkDir = workDirPath
 	return nil
@@ -379,14 +419,14 @@ func (judge *PythonJudge) Cleanup() error {
 }
 
 // Creates and returns a Judge implementation corresponding to the given language
-func NewJudgeFor(meta config.EgorMeta) (Judge, error) {
+func NewJudgeFor(meta config.EgorMeta, configuration *config.Config) (Judge, error) {
 	switch meta.TaskLang {
 	case "java":
 		return &JavaJudge{Meta: meta, checker: &DiffChecker{}}, nil
 	case "cpp":
-		return &CppJudge{Meta: meta, checker: &DiffChecker{}}, nil
+		return &CppJudge{Meta: meta, checker: &DiffChecker{}, LibraryLocation: configuration.LibraryLocation}, nil
 	case "c":
-		return &CppJudge{Meta: meta, checker: &DiffChecker{}}, nil
+		return &CppJudge{Meta: meta, checker: &DiffChecker{}, LibraryLocation: configuration.LibraryLocation}, nil
 	case "python":
 		return &PythonJudge{Meta: meta, checker: &DiffChecker{}}, nil
 	}
@@ -408,7 +448,7 @@ func RunAction(_ *cli.Context) error {
 		return err
 	}
 
-	judge, err := NewJudgeFor(egorMeta)
+	judge, err := NewJudgeFor(egorMeta, configuration)
 	if err != nil {
 		return err
 	}

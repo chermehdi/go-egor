@@ -24,6 +24,7 @@ type Config struct {
 	ConfigFileName string `yaml:"config_file_name"`
 	Version        string `yaml:"version"`
 	Author         string `yaml:"author"`
+	LibraryLocation string `yaml:"lib_location"`
 }
 
 func getDefaultConfigLocation() (string, error) {
@@ -35,6 +36,7 @@ func getDefaultConfigLocation() (string, error) {
 }
 
 func createDefaultConfiguration() *Config {
+	homeDir, _ := os.UserHomeDir()
 	return &Config{
 		Server: struct {
 			Port int `yaml:"port"`
@@ -48,6 +50,7 @@ func createDefaultConfiguration() *Config {
 		},
 		Version:        "0.1.0",
 		ConfigFileName: "egor-meta.json",
+		LibraryLocation: path.Join(homeDir, "include"),
 	}
 }
 
@@ -112,6 +115,8 @@ func GetConfigurationValue(config *Config, key string) (string, error) {
 		return config.Lang.Default, nil
 	} else if lowerKey == "author" {
 		return config.Author, nil
+	}else if lowerKey == "cpp.lib.location" {
+		return config.LibraryLocation, nil
 	} else {
 		return "", errors.New(fmt.Sprintf("Unknown config key %s", key))
 	}
