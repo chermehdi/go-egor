@@ -302,11 +302,11 @@ func (judge *JavaJudge) Checker() Checker {
 // C / Cpp Judge
 //
 type CppJudge struct {
-	Meta           config.EgorMeta
-	CurrentWorkDir string
-	checker        Checker
+	Meta            config.EgorMeta
+	CurrentWorkDir  string
+	checker         Checker
 	LibraryLocation string
-	hasLibrary bool
+	hasLibrary      bool
 }
 
 func (judge *CppJudge) getGenFilePath() string {
@@ -321,7 +321,7 @@ func (judge *CppJudge) hasLibraryLocation() bool {
 // We expect fileName to be: main.cpp or main_gen.cpp.
 func (judge *CppJudge) compile(currentDir, fileName string) error {
 	var stderrBuffer bytes.Buffer
-	cmd := exec.Command("g++", "--std=c++14",  fileName, "-o", "work/sol")
+	cmd := exec.Command("g++", "--std=c++14", fileName, "-o", "work/sol")
 	cmd.Dir = currentDir
 	cmd.Stderr = &stderrBuffer
 	if err := cmd.Run(); err != nil {
@@ -360,9 +360,9 @@ func (judge *CppJudge) Setup() error {
 		if err := judge.compile(currentDir, judge.getGenFilePath()); err != nil {
 			return err
 		}
-	}else {
+	} else {
 		if err := judge.compile(currentDir, judge.Meta.TaskFile); err != nil {
-				return err
+			return err
 		}
 	}
 	judge.CurrentWorkDir = workDirPath

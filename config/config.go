@@ -119,7 +119,7 @@ func GetConfigurationValue(config *Config, key string) (string, error) {
 		return config.Lang.Default, nil
 	} else if lowerKey == "author" {
 		return config.Author, nil
-	}else if lowerKey == "cpp.lib.location" {
+	} else if lowerKey == "cpp.lib.location" {
 		return config.CppLibraryLocation, nil
 	} else {
 		return "", errors.New(fmt.Sprintf("Unknown config key %s", key))
