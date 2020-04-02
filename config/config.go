@@ -13,6 +13,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const LatestVersion = "0.2.0"
+
 // The configuration of the CLI
 type Config struct {
 	Server struct {
@@ -52,7 +54,7 @@ func createDefaultConfiguration() *Config {
 		}{
 			Default: "cpp",
 		},
-		Version:            "0.1.0",
+		Version:            LatestVersion,
 		ConfigFileName:     "egor-meta.json",
 		CppLibraryLocation: path.Join(homeDir, "include"),
 	}
@@ -88,6 +90,12 @@ func LoadConfiguration(location string) (*Config, error) {
 	err = decoder.Decode(&config)
 	if err != nil {
 		return nil, err
+	}
+	// Check if the current version (maybe the user already has a configuration file)
+	// is an older version. and update accordingly
+	if config.Version < LatestVersion {
+		config.Version = LatestVersion
+		_ = SaveConfiguration(&config)
 	}
 	return &config, nil
 }
