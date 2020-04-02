@@ -22,7 +22,7 @@ func GetFileContent(filePath string) (string, error) {
 	return filecontent, nil
 }
 
-func CopyAction(context *cli.Context) error {
+func CopyAction(*cli.Context) error {
 	cwd, err := os.Getwd()
 	if err != nil {
 		color.Red(fmt.Sprintf("Failed to list test cases : %s", err.Error()))
@@ -41,8 +41,14 @@ func CopyAction(context *cli.Context) error {
 		color.Red(fmt.Sprintf("Failed to load egor MetaData : %s", err.Error()))
 		return err
 	}
+	var taskFile string
 
-	taskFile := metaData.TaskFile
+	// TODO(chermehdi): the name of the generated file should be in a unique location
+	if (metaData.TaskLang == "cpp" || metaData.TaskLang == "c") && configuration.HasCppLibrary() {
+		taskFile = "main_gen.cpp"
+	} else {
+		taskFile = metaData.TaskFile
+	}
 	taskContent, err := GetFileContent(taskFile)
 	if err != nil {
 		color.Red(fmt.Sprintf("Failed to load task file content : %s", err.Error()))
