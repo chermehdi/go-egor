@@ -184,7 +184,7 @@ func (c *ConsoleJudgeReport) Display() {
 			c.Descs[i].CustomCase,
 			output,
 			getStderrDisplay(stat.Stderr),
-			stat.Duration
+			stat.Duration,
 		})
 	}
 	t.SetStyle(table.StyleLight)
