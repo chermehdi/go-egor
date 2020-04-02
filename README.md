@@ -31,7 +31,43 @@ and help execute tests locally via their favorite programming language.
     - `egor batch (in developement)`: Tests the main solution for this task against another solution (probably written in another language than the main one)
     by running both of them and feeding them the tests for this task, this is useful if you have a brute force solution and an efficient solution
     and you want to validate the optimal solution against the one you are sure that is working.
+    
+## C++ Library code
+- If you are using C++ to do competitive programming, and you have your own library that you use,
+you can just tell egor the location of your library, and it will use it when finding tasks that rely on it.
 
+### Steps to make it work
+1- run `egor config set cpp.lib.location /path/to/root/of/library` to tell egor the path to use to resolve your includes.
+
+2- Create your tasks normally and use your library:
+
+```cpp
+#include <iostream>
+#include <vector>
+// notice the include is using " and not <
+#include "kratos/graphs/tree.h"
+
+using namespace std;
+
+int main() {
+    int n; cin >> n;
+    kratos::Tree tree;
+    for(int i = 0; i < n - 1; ++i) {
+        int u, v; cin >> u >> v;
+        tree.add_edge(u, v):
+    } 
+    cerr << tree.debug() << endl;
+}
+```
+
+3- In this example, the configuration i have is:
+```
+$ egor config set cpp.lib.location
+/home/directory/include
+
+$ ls /home/directory/include
+kratos
+``` 
 ## Contribution
 
 - Contribution to the project can be done in multiple ways, you can report bugs and issues or you can discuss new features that you like being added in future versions by creating a new issue
