@@ -5,10 +5,6 @@ import (
 	"context"
 	json2 "encoding/json"
 	"fmt"
-	. "github.com/chermehdi/egor/config"
-	"github.com/chermehdi/egor/templates"
-	"github.com/fatih/color"
-	"github.com/urfave/cli/v2"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -16,6 +12,11 @@ import (
 	"strings"
 	template2 "text/template"
 	"time"
+
+	. "github.com/chermehdi/egor/config"
+	"github.com/chermehdi/egor/templates"
+	"github.com/fatih/color"
+	"github.com/urfave/cli/v2"
 )
 
 const listenAddr = ":4243"
@@ -100,6 +101,7 @@ func CreateDirectoryStructure(task Task, config Config, rootDir string) (string,
 // it will parse it as a json Task and return it.
 func extractTaskFromJson(json string) (*Task, error) {
 	var task Task
+	task.TimeLimit = 10000 // default timelimit to 10 seconds
 	err := json2.Unmarshal([]byte(json), &task)
 	if err != nil {
 		return nil, err
