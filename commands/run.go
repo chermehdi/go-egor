@@ -4,13 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-<<<<<<< HEAD
-	"github.com/chermehdi/egor/config"
-	"github.com/chermehdi/skimo/skimo"
-	"github.com/fatih/color"
-	"github.com/jedib0t/go-pretty/table"
-=======
->>>>>>> 79615ff894b1bfca7f91ab4ff44e7b6c5f628e54
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -18,6 +11,11 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/chermehdi/egor/config"
+	"github.com/chermehdi/skimo/skimo"
+	"github.com/fatih/color"
+	"github.com/jedib0t/go-pretty/table"
 
 	"github.com/chermehdi/egor/config"
 	"github.com/fatih/color"
