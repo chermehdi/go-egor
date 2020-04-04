@@ -160,7 +160,7 @@ func getDisplayStatus(status int8) string {
 	case WA:
 		return red("WA")
 	case TL:
-		return blue("TL") // TODO(Eroui): Add another color?
+		return blue("TL")
 	}
 	return "Unknown"
 }
