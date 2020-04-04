@@ -17,10 +17,6 @@ import (
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/table"
 
-	"github.com/chermehdi/egor/config"
-	"github.com/fatih/color"
-	"github.com/jedib0t/go-pretty/table"
-
 	"github.com/urfave/cli/v2"
 )
 
