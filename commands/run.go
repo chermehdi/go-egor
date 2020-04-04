@@ -196,16 +196,16 @@ func newJudgeReport() JudgeReport {
 }
 
 func timedExecution(cmd *exec.Cmd, timeOut float64) (int8, time.Duration, error) {
-	start := time.Now()
 	cmd.Start()
+	start := time.Now()
 	done := make(chan error)
 	go func() { done <- cmd.Wait() }()
 
 	timeout := time.After(time.Duration(timeOut) * time.Millisecond)
 	select {
 	case <-timeout:
-		cmd.Process.Kill()
 		elapsed := time.Since(start)
+		cmd.Process.Kill()
 		return TO, elapsed, nil
 	case err := <-done:
 		elapsed := time.Since(start)
