@@ -40,11 +40,12 @@ func (ioFile *IoFile) GetId() int {
 // so an update to it (either from the outside, or by invoking egor commands) can change
 // the behavior of execution of the egor cli.
 type EgorMeta struct {
-	TaskName string
-	TaskLang string
-	Inputs   []IoFile
-	Outputs  []IoFile
-	TaskFile string
+	TaskName  string
+	TaskLang  string
+	Inputs    []IoFile
+	Outputs   []IoFile
+	TaskFile  string
+	TimeLimit float64
 }
 
 // Resolves the task file given the default language.
@@ -75,11 +76,12 @@ func NewEgorMeta(task Task, config Config) EgorMeta {
 		panic(err)
 	}
 	return EgorMeta{
-		TaskName: task.Name,
-		TaskLang: config.Lang.Default,
-		Inputs:   inputs,
-		Outputs:  outputs,
-		TaskFile: taskFile,
+		TaskName:  task.Name,
+		TaskLang:  config.Lang.Default,
+		Inputs:    inputs,
+		Outputs:   outputs,
+		TaskFile:  taskFile,
+		TimeLimit: task.TimeLimit,
 	}
 }
 

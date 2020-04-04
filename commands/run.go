@@ -4,16 +4,18 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/chermehdi/egor/config"
-	"github.com/chermehdi/skimo/skimo"
-	"github.com/fatih/color"
-	"github.com/jedib0t/go-pretty/table"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
+
+	"github.com/chermehdi/egor/config"
+	"github.com/chermehdi/skimo/skimo"
+	"github.com/fatih/color"
+	"github.com/jedib0t/go-pretty/table"
 
 	"github.com/urfave/cli/v2"
 )
@@ -23,6 +25,12 @@ var (
 	SK int8 = 1
 	RE int8 = 2
 	WA int8 = 3
+	TL int8 = 4
+)
+
+var (
+	OK int8 = 0 // OK execution status
+	TO int8 = 1 // Timed out status
 )
 
 var (
@@ -30,9 +38,13 @@ var (
 	red     = color.New(color.FgRed).SprintfFunc()
 	magenta = color.New(color.FgMagenta).SprintfFunc()
 	yellow  = color.New(color.FgYellow).SprintfFunc()
+	blue    = color.New(color.FgBlue).SprintfFunc()
 )
 
 const WorkDir = "work"
+
+// Time out delta in miliseconds
+const TimeOutDelta float64 = 25.0
 
 // Checks the output of a given testcase against it's expected output
 type Checker interface {
@@ -59,6 +71,7 @@ type CaseDescription struct {
 	OutputFile string
 	WorkFile   string
 	CustomCase bool
+	TimeLimit  float64
 }
 
 func getWorkFile(fileName string) string {
@@ -68,7 +81,7 @@ func getWorkFile(fileName string) string {
 }
 
 // Creates a new CaseDescription from a pair of input and output IoFiles
-func NewCaseDescription(input, output config.IoFile) *CaseDescription {
+func NewCaseDescription(input, output config.IoFile, timeLimit float64) *CaseDescription {
 	base, file := filepath.Split(input.Path)
 	workFilePath := path.Join(base, getWorkFile(file))
 	return &CaseDescription{
@@ -76,6 +89,7 @@ func NewCaseDescription(input, output config.IoFile) *CaseDescription {
 		OutputFile: output.Path,
 		WorkFile:   workFilePath,
 		CustomCase: input.Custom,
+		TimeLimit:  timeLimit,
 	}
 }
 
@@ -85,6 +99,7 @@ type CaseStatus struct {
 	Status       int8
 	CheckerError error
 	Stderr       string
+	Duration     time.Duration
 }
 
 // Implementation must be able to prepare the working environment to compile and execute testscases,
@@ -144,6 +159,8 @@ func getDisplayStatus(status int8) string {
 		return yellow("SK")
 	case WA:
 		return red("WA")
+	case TL:
+		return blue("TL")
 	}
 	return "Unknown"
 }
@@ -158,7 +175,7 @@ func getStderrDisplay(stderr string) string {
 func (c *ConsoleJudgeReport) Display() {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"#", "Test Name", "Status", "Custom", "Additional infos", "Stderr"})
+	t.AppendHeader(table.Row{"#", "Test Name", "Status", "Custom", "Additional infos", "Stderr", "Execution Time"})
 	for i, stat := range c.Stats {
 		output := "None"
 		if stat.CheckerError != nil {
@@ -171,6 +188,7 @@ func (c *ConsoleJudgeReport) Display() {
 			c.Descs[i].CustomCase,
 			output,
 			getStderrDisplay(stat.Stderr),
+			stat.Duration,
 		})
 	}
 	t.SetStyle(table.StyleLight)
@@ -179,6 +197,26 @@ func (c *ConsoleJudgeReport) Display() {
 
 func newJudgeReport() JudgeReport {
 	return &ConsoleJudgeReport{Stats: []CaseStatus{}}
+}
+
+// Utility function to execute a given command and insure to stop it after a timeOut (in miliseconds).
+// The function returns the status of the execution, the duration of the exeuction, and an error (if any).
+func timedExecution(cmd *exec.Cmd, timeOut float64) (int8, time.Duration, error) {
+	cmd.Start()
+	start := time.Now()
+	done := make(chan error)
+	go func() { done <- cmd.Wait() }()
+
+	timeout := time.After(time.Duration(timeOut) * time.Millisecond)
+	select {
+	case <-timeout:
+		elapsed := time.Since(start)
+		cmd.Process.Kill()
+		return TO, elapsed, nil
+	case err := <-done:
+		elapsed := time.Since(start)
+		return OK, elapsed, err
+	}
 }
 
 // Utility function to execute the given command that is associated with the given judge
@@ -208,11 +246,23 @@ func execute(judge Judge, desc CaseDescription, command string, args ...string) 
 	cmd.Stdin = inputFile
 	cmd.Stdout = outputFile
 	cmd.Stderr = &stderrBuffer
-	if err = cmd.Run(); err != nil {
+
+	status, duration, err := timedExecution(cmd, desc.TimeLimit+TimeOutDelta)
+	if status == TO {
+		return CaseStatus{
+			Status:       TL,
+			CheckerError: nil,
+			Stderr:       stderrBuffer.String(),
+			Duration:     duration,
+		}, nil
+	}
+
+	if err != nil {
 		return CaseStatus{
 			Status:       RE,
 			CheckerError: nil,
 			Stderr:       stderrBuffer.String(),
+			Duration:     duration,
 		}, err
 	}
 
@@ -221,6 +271,7 @@ func execute(judge Judge, desc CaseDescription, command string, args ...string) 
 		return CaseStatus{
 			Status:       RE,
 			CheckerError: nil,
+			Duration:     duration,
 		}, err
 	}
 	output, err := ioutil.ReadFile(desc.WorkFile)
@@ -229,6 +280,7 @@ func execute(judge Judge, desc CaseDescription, command string, args ...string) 
 		return CaseStatus{
 			Status:       RE,
 			CheckerError: nil,
+			Duration:     duration,
 		}, err
 	}
 	err = judge.Checker().Check(string(output), string(expectedOutput))
@@ -237,12 +289,14 @@ func execute(judge Judge, desc CaseDescription, command string, args ...string) 
 			Status:       WA,
 			CheckerError: err,
 			Stderr:       stderrBuffer.String(),
+			Duration:     duration,
 		}, err
 	}
 	return CaseStatus{
 		Status:       AC,
 		CheckerError: nil,
 		Stderr:       stderrBuffer.String(),
+		Duration:     duration,
 	}, err
 }
 
@@ -459,7 +513,7 @@ func RunAction(_ *cli.Context) error {
 
 	for i, input := range egorMeta.Inputs {
 		output := egorMeta.Outputs[i]
-		caseDescription := NewCaseDescription(input, output)
+		caseDescription := NewCaseDescription(input, output, egorMeta.TimeLimit)
 		status := judge.RunTestCase(*caseDescription)
 		report.Add(status, *caseDescription)
 	}
