@@ -75,6 +75,9 @@ func NewEgorMeta(task Task, config Config) EgorMeta {
 	if err != nil {
 		panic(err)
 	}
+	if task.TimeLimit == 0 {
+		task.TimeLimit = 10000
+	}
 	return EgorMeta{
 		TaskName:  task.Name,
 		TaskLang:  config.Lang.Default,
