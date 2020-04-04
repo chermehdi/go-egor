@@ -478,6 +478,7 @@ func NewJudgeFor(meta config.EgorMeta, configuration *config.Config) (Judge, err
 	case "java":
 		return &JavaJudge{Meta: meta, checker: &DiffChecker{}}, nil
 	case "cpp":
+		return &CppJudge{Meta: meta, checker: &DiffChecker{}, hasLibrary: configuration.HasCppLibrary(), LibraryLocation: configuration.CppLibraryLocation}, nil
 	case "c":
 		return &CppJudge{Meta: meta, checker: &DiffChecker{}, hasLibrary: configuration.HasCppLibrary(), LibraryLocation: configuration.CppLibraryLocation}, nil
 	case "python":
