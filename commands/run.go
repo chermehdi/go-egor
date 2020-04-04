@@ -38,9 +38,12 @@ var (
 	red     = color.New(color.FgRed).SprintfFunc()
 	magenta = color.New(color.FgMagenta).SprintfFunc()
 	yellow  = color.New(color.FgYellow).SprintfFunc()
+	blue    = color.New(color.FgBlue).SprintfFunc()
 )
 
 const WorkDir = "work"
+
+// Time out delta in miliseconds
 const TimeOutDelta float64 = 25.0
 
 // Checks the output of a given testcase against it's expected output
@@ -157,7 +160,7 @@ func getDisplayStatus(status int8) string {
 	case WA:
 		return red("WA")
 	case TL:
-		return red("TL") // TODO(Eroui): Add another color?
+		return blue("TL") // TODO(Eroui): Add another color?
 	}
 	return "Unknown"
 }
@@ -196,6 +199,8 @@ func newJudgeReport() JudgeReport {
 	return &ConsoleJudgeReport{Stats: []CaseStatus{}}
 }
 
+// Utility function to execute a given command and insure to stop it after a timeOut (in miliseconds).
+// The function returns the status of the execution, the duration of the exeuction, and an error (if any).
 func timedExecution(cmd *exec.Cmd, timeOut float64) (int8, time.Duration, error) {
 	cmd.Start()
 	start := time.Now()
