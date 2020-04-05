@@ -60,9 +60,18 @@ type DiffChecker struct {
 func (c *DiffChecker) Check(got, expected string) error {
 	// Compare the trimmed output from both input and output
 	if strings.TrimRight(got, " \t\n\r") != strings.TrimRight(expected, " \t\n\r") {
-		return errors.New(fmt.Sprintf("Checker failed, expected:\n%s\nfound:\n%s", expected, got))
+		return errors.New(fmt.Sprintf("Checker failed, expected:\n%s\nfound:\n%s", Compress(expected), Compress(got)))
 	}
 	return nil
+}
+
+// Compress a string to at most 64 characters.
+func Compress(s string) string {
+	if len(s) <= 64 {
+		return s
+	}
+
+	return s[0:30] + "..." + s[len(s)-31:]
 }
 
 // Case description contains minimum information required to run one test case.
