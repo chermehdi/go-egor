@@ -64,6 +64,7 @@ func askEndOfFile(question string) string {
 	return result
 }
 
+// Fill the given task reference according to input coming from the reader object.
 func fillTaskFromQuestions(task *config.Task, reader io.Reader) error {
 	task.Name = ask(reader, "Task Name?", task.Name)
 	task.TimeLimit = askInt(reader, "Time limit in ms?", task.TimeLimit)
@@ -76,9 +77,10 @@ func fillTaskFromQuestions(task *config.Task, reader io.Reader) error {
 			Output: output,
 		})
 	}
-	// TODO(chermehdi): This information is irrelevant now, because we don't do anything special with the languages sections, make sure to remove
-	// When this is updated.
-	isJava := askBool(reader, "Is your language Java (you will be asked other questions if it's a yes)? (Y/N)?", false)
+	// TODO(chermehdi): This information is irrelevant now, because we don't do anything special with the languages
+	// sections, make sure to remove When this is updated.
+	isJava := askBool(reader, "Is your language Java (you will be asked other questions if it's a yes)? (Y/N)?",
+		false)
 	if isJava {
 		className := ask(reader, "\nMain class name?", "Main")
 		// Avoid class names with strings
@@ -137,7 +139,7 @@ var CreateTaskCommand = cli.Command{
 	Name:      "create",
 	Aliases:   []string{"c"},
 	Usage:     "Create a new task directory",
-	UsageText: "egor showcases",
+	UsageText: "egor create or egor create -i",
 	Action:    CreateTaskAction,
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
