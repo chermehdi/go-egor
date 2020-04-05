@@ -99,7 +99,7 @@ func CreateTaskAction(context *cli.Context) error {
 	// Default task containing default values.
 	task := config.Task{
 		Name:        "Random Task",
-		TimeLimit:   2000,
+		TimeLimit:   10000,
 		MemoryLimit: 256,
 		Tests:       nil,
 		TestType:    "single",
