@@ -378,9 +378,12 @@ func (judge *CppJudge) compile(currentDir, fileName string) error {
 	cmd := exec.Command("g++", "--std=c++14", fileName, "-o", "work/sol")
 	cmd.Dir = currentDir
 	cmd.Stderr = &stderrBuffer
-	if err := cmd.Run(); err != nil {
+	err := cmd.Run()
+	if err != nil {
 		color.Red("Could not  compile, Cause: \n%s", stderrBuffer.String())
 		return err
+	} else if stderrBuffer.String() != "" {
+	   color.Yellow("Warnings:\n%s\n", stderrBuffer.String());
 	}
 	return nil
 }
