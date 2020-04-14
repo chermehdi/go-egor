@@ -375,13 +375,17 @@ func (judge *CppJudge) hasLibraryLocation() bool {
 // We expect fileName to be: main.cpp or main_gen.cpp.
 func (judge *CppJudge) compile(currentDir, fileName string) error {
 	var stderrBuffer bytes.Buffer
-	cmd := exec.Command("g++", "--std=c++14", fileName, "-o", "work/sol")
+	cmd := exec.Command("g++", "--std=c++14", "-Wshadow", "-Wall", fileName, "-o", "work/sol", "-fsanitize=undefined", "-fsanitize=address")
 	cmd.Dir = currentDir
 	cmd.Stderr = &stderrBuffer
 	if err := cmd.Run(); err != nil {
 		color.Red("Could not  compile, Cause: \n%s", stderrBuffer.String())
 		return err
 	}
+  // Print Stderr output (might contain warnings from compiler):
+  if len(stderrBuffer.String()) > 0 {
+    fmt.Print(stderrBuffer.String())
+  }
 	return nil
 }
 
