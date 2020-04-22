@@ -48,6 +48,7 @@ func main() {
 			&commands.CopyCommand,
 			&commands.PrintCaseCommand,
 			&commands.TestCommand,
+			&commands.CreateTaskCommand,
 		},
 	}
 
