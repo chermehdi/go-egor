@@ -87,7 +87,7 @@ func TestCreateDirectoryStructure(t *testing.T) {
 	CreateDirectory(rootDir)
 	defer DeleteDir(rootDir)
 
-	_, err := CreateDirectoryStructure(task, configuration, rootDir)
+	_, err := CreateDirectoryStructure(task, configuration, rootDir, nil)
 	assert.NoError(t, err)
 
 	taskDir := path.Join(rootDir, task.Name)

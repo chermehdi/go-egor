@@ -3,6 +3,8 @@ package templates
 import (
 	"errors"
 	"fmt"
+	"github.com/chermehdi/egor/config"
+	"io/ioutil"
 )
 
 const CppTemplate = `
@@ -57,7 +59,20 @@ const PythonTemplate = `
 # {{end}}
 `
 
-func ResolveTemplateByLanguage(lang string) (string, error) {
+func ResolveTemplateByLanguage(config config.Config) (string, error) {
+	templates := config.CustomTemplate
+	path, has := templates[config.Lang.Default]
+	if !has {
+		return resolveWithDefaultTemplate(config.Lang.Default)
+	}
+	content, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	return string(content), nil
+}
+
+func resolveWithDefaultTemplate(lang string) (string, error) {
 	switch lang {
 	case "cpp":
 		return CppTemplate, nil

@@ -27,6 +27,9 @@ type Config struct {
 	Version            string `yaml:"version"`
 	Author             string `yaml:"author"`
 	CppLibraryLocation string `yaml:"cpp_lib_location"`
+	// Should contain template locations per programming language code
+	// The expected format is: cpp -> /path/to/template_cpp.template
+	CustomTemplate map[string]string `yaml:"custom_template"`
 }
 
 func (conf *Config) HasCppLibrary() bool {
@@ -57,6 +60,7 @@ func createDefaultConfiguration() *Config {
 		Version:            LatestVersion,
 		ConfigFileName:     "egor-meta.json",
 		CppLibraryLocation: path.Join(homeDir, "include"),
+		CustomTemplate:     make(map[string]string),
 	}
 }
 

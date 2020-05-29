@@ -26,6 +26,9 @@ func UpdateConfiguration(config *config.Config, key, value string) error {
 		config.Author = value
 	} else if lowerKey == "cpp.lib.location" {
 		config.CppLibraryLocation = value
+	} else if strings.HasPrefix(key, "custom.template") {
+		lang := key[strings.LastIndex(key, ".")+1:]
+		config.CustomTemplate[lang] = value
 	} else {
 		// Unknow key
 		return errors.New(fmt.Sprintf("Unknown configuration property %s", key))
@@ -74,6 +77,10 @@ func GetAction(context *cli.Context) error {
 		color.Green("lang.default    \t\t %s\n", configuration.Lang.Default)
 		color.Green("author          \t\t %s\n", configuration.Author)
 		color.Green("cpp.lib.location\t\t %s\n", configuration.CppLibraryLocation)
+		color.Green("config.templates: \n\n")
+		for k, v := range configuration.CustomTemplate {
+			color.Green("\t%s\t\t %s\n", k, v)
+		}
 		return nil
 	} else {
 		value, err := config.GetConfigurationValue(configuration, context.Args().First())

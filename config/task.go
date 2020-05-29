@@ -1,5 +1,7 @@
 package config
 
+import "time"
+
 // Represents a Competitive programming task's input and output for a some test case.
 type TestCase struct {
 	Input  string
@@ -32,4 +34,29 @@ type Task struct {
 	Input       IOType
 	Output      IOType
 	Languages   map[string]LanguageDescription
+}
+
+// Template parameters
+// This type will hold all the available information to the templates loaded by the user
+type TemplateContext struct {
+	Author            string
+	Time              string
+	MultipleTestCases bool
+	Interactive       bool
+	FastIO            bool
+	Problem           string
+	Url               string
+}
+
+// Creates a new template context from the configuration and the task metadata
+func CreateTemplateContext(config Config, task Task) TemplateContext {
+	return TemplateContext{
+		Author:            config.Author,
+		Time:              time.Now().Format(time.UnixDate),
+		MultipleTestCases: false,
+		Interactive:       false,
+		FastIO:            false,
+		Problem:           task.Name,
+		Url:               task.Url,
+	}
 }

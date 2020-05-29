@@ -10,7 +10,7 @@ and help execute tests locally via their favorite programming language.
 - There are two ways for installing egor.
 
 ### Download compiled binary
-- You can download the binary that corresponds to your operating system and add it to your `PATH` variable, you can find the binaries in the [releases](https://github.com/chermehdi/go-egor/releases) page.
+- You can download the binary corresponding to your operating system and add it to your `PATH` variable, you can find the binaries in the [releases](https://github.com/chermehdi/go-egor/releases) page.
 - For people running Mac OSX Catalina, this won't work and you will be forced to go with the Build from source solution.
 
 ### Build from source
@@ -68,6 +68,63 @@ $ egor config set cpp.lib.location
 $ ls /home/directory/include
 kratos
 ``` 
+
+## Custom templates
+
+- Egor also support the use of custom templates per each language, powered by the golang template engine. to take full advantage of it you can
+take a look at all the details in the official [documentation](https://golang.org/pkg/text/template/).
+
+- A typical configuration for a template, is the following: 
+```
+//
+// {{ if .Problem}} {{ .Problem }} {{ end }} {{ if .Url }} {{ .Url }} {{ end }}
+{{- if .Author }}
+// @author {{ .Author }}
+// created {{ .Time }}
+{{- end }}
+// 
+#include <iostream>
+#include <vector>
+#include <set>
+#include <algorithm>
+#include <map>
+
+using namespace std;
+{{ if .MultipleTestCases }}
+void solve() {
+}
+{{ end }}
+
+int main() {
+  {{- if .FastIO }}
+  ios_base::sync_with_stdio(false);
+  cin.tie(0);
+  {{- end}}
+
+  {{- if .MultipleTestCases }}
+  int t; cin >> t;
+  while(t--) {
+    solve();
+  }
+  {{- end}}
+}
+```
+Each template is provided by a model containing some basic information about the task that is going to be generated
+to help create dynamic templates, the model reference is
+```go
+type TemplateContext struct {
+	Author            string
+	Time              string
+	MultipleTestCases bool
+	Interactive       bool
+	FastIO            bool
+	Problem           string
+	Url               string
+}
+```
+You can access any of the model fields in the template, and act make changes accordingly dependending on your preferences.
+- Running the command `egor config set config.templates.{lang} /path/to/template/file` will register the given template and will use it 
+for the given language for future tasks.
 ## Contribution
 
 - Contribution to the project can be done in multiple ways, you can report bugs and issues or you can discuss new features that you like being added in future versions by creating a new issue
