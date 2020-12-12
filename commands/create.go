@@ -125,7 +125,7 @@ func CreateTaskAction(context *cli.Context) error {
 			return err
 		}
 	}
-	location, err := CreateDirectoryStructure(task, *configuration, curDir)
+	location, err := CreateDirectoryStructure(task, *configuration, curDir, nil)
 	if err != nil {
 		return err
 	}

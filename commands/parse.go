@@ -31,7 +31,7 @@ func SerializeTask(meta EgorMeta) (string, error) {
 	return buffer.String(), nil
 }
 
-func CreateDirectoryStructure(task Task, config Config, rootDir string) (string, error) {
+func CreateDirectoryStructure(task Task, config Config, rootDir string, context *cli.Context) (string, error) {
 	taskDir := path.Join(rootDir, task.Name)
 	if err := os.Mkdir(taskDir, 0777); err != nil {
 		return "", err
@@ -78,7 +78,7 @@ func CreateDirectoryStructure(task Task, config Config, rootDir string) (string,
 			return "", err
 		}
 	}
-	templateContent, err := templates.ResolveTemplateByLanguage(config.Lang.Default)
+	templateContent, err := templates.ResolveTemplateByLanguage(config)
 	if err != nil {
 		return "", err
 	}
@@ -91,7 +91,10 @@ func CreateDirectoryStructure(task Task, config Config, rootDir string) (string,
 	if err != nil {
 		return "", err
 	}
-	if err = compiledTemplate.Execute(taskFile, config); err != nil {
+	templateContext := CreateTemplateContext(config, task)
+	templateContext.MultipleTestCases = context.Bool("multiple")
+	templateContext.FastIO = context.Bool("fast-io")
+	if err = compiledTemplate.Execute(taskFile, templateContext); err != nil {
 		return "", err
 	}
 	return taskDir, nil
@@ -141,7 +144,7 @@ func waitForShutDown(server *http.Server, done chan<- string, quit <-chan string
 	done <- content
 }
 
-func ParseAction(_ *cli.Context) error {
+func ParseAction(context *cli.Context) error {
 	msgReceiveChannel := make(chan string, 1)
 	msgReadChannel := make(chan string, 1)
 
@@ -170,7 +173,7 @@ func ParseAction(_ *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	taskDir, err := CreateDirectoryStructure(*task, *config, cwd)
+	taskDir, err := CreateDirectoryStructure(*task, *config, cwd, context)
 	if err != nil {
 		color.Red("Error happened %v", err)
 		return err
@@ -185,8 +188,22 @@ func ParseAction(_ *cli.Context) error {
 // and an additional `egor-meta.json` file, and finally your task file, which is usually a `main.cpp` or `Main.java`
 // file depending on the default configured language.
 var ParseCommand = cli.Command{
-	Name:      "parse",
-	Aliases:   []string{"p"},
+	Name:    "parse",
+	Aliases: []string{"p"},
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:    "fast-io",
+			Usage:   "Indicates that this task will require the use of Fast IO",
+			Aliases: []string{"io", "fio"},
+			Value:   false,
+		},
+		&cli.BoolFlag{
+			Name:    "multiple",
+			Usage:   "Indicates if this task has multiple test cases",
+			Aliases: []string{"m", "mul"},
+			Value:   false,
+		},
+	},
 	Usage:     "Parse task from navigator",
 	UsageText: "egor parse",
 	Action:    ParseAction,
