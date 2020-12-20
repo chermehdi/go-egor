@@ -13,7 +13,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const LatestVersion = "0.2.0"
+const LatestVersion = "0.4.0"
 
 // The configuration of the CLI
 type Config struct {
