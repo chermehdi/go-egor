@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	json2 "encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
