@@ -158,7 +158,7 @@ func ParseAction(context *cli.Context) error {
 	}
 	json := <-msgReceiveChannel
 	color.Green("Server stopped")
-	fmt.Printf("Received data %v\n", json)
+	color.Green("Received data from CHelper companion")
 	// first line contains a json string
 	lines := strings.Split(json, "\n")
 	task, err := extractTaskFromJson(lines[1])
