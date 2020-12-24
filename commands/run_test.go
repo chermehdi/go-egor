@@ -20,3 +20,23 @@ func TestTimedExecution(t *testing.T) {
 	assert.Equal(t, err, nil)
 	assert.Equal(t, status, OK)
 }
+
+func TestChecker_TokenBasedCheckerShouldIgnoreSpaces(t *testing.T) {
+	checker := &TokenChecker{}
+	assert.Nil(t, checker.Check("a b c", "a  b c"))
+}
+
+func TestChecker_TokenBasedCheckerShouldIgnoreNewLines(t *testing.T) {
+	checker := &TokenChecker{}
+	assert.Nil(t, checker.Check("a b c", "a  b \nc"))
+}
+
+func TestChecker_TokenBasedCheckerShouldFailOnMismatchedNumberOfTokens(t *testing.T) {
+	checker := &TokenChecker{}
+	assert.NotNil(t, checker.Check("a b c", "ab d"))
+}
+
+func TestChecker_TokenBasedCheckerShouldFailOnDifferentToken(t *testing.T) {
+	checker := &TokenChecker{}
+	assert.NotNil(t, checker.Check("a b c", "a b d"))
+}

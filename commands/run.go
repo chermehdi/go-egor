@@ -65,6 +65,32 @@ func (c *DiffChecker) Check(got, expected string) error {
 	return nil
 }
 
+// Implementation of a slightly smarter checker.
+// This checker tokenizes the input and expected output and compares them token
+// by token ignoring spaces and empty lines.
+type TokenChecker struct {
+}
+
+func (c *TokenChecker) Check(got, expected string) error {
+	inputTokens := strings.Fields(got)
+	outputTokens := strings.Fields(expected)
+	if len(inputTokens) != len(outputTokens) {
+		return errors.New(fmt.Sprintf("Checker failed, number of tokens different: expected %d, got %d\n\r",
+			len(outputTokens), len(inputTokens)))
+	}
+	i := 0
+	n := len(inputTokens)
+	for i < n {
+		if inputTokens[i] != outputTokens[i] {
+			return errors.New(fmt.Sprintf("Checker failed, token %d does not match: expected %s, got %s\n\r",
+				i, outputTokens[i], inputTokens[i]))
+		}
+		i = i + 1
+	}
+	// everything matched.
+	return nil
+}
+
 // Case description contains minimum information required to run one test case.
 type CaseDescription struct {
 	InputFile  string
@@ -474,21 +500,29 @@ func (judge *PythonJudge) Cleanup() error {
 }
 
 // Creates and returns a Judge implementation corresponding to the given language
-func NewJudgeFor(meta config.EgorMeta, configuration *config.Config) (Judge, error) {
+func NewJudgeFor(meta config.EgorMeta, configuration *config.Config, checker Checker) (Judge, error) {
 	switch meta.TaskLang {
 	case "java":
-		return &JavaJudge{Meta: meta, checker: &DiffChecker{}}, nil
+		return &JavaJudge{Meta: meta, checker: checker}, nil
 	case "cpp":
-		return &CppJudge{Meta: meta, checker: &DiffChecker{}, hasLibrary: configuration.HasCppLibrary(), LibraryLocation: configuration.CppLibraryLocation}, nil
+		return &CppJudge{Meta: meta, checker: checker, hasLibrary: configuration.HasCppLibrary(), LibraryLocation: configuration.CppLibraryLocation}, nil
 	case "c":
-		return &CppJudge{Meta: meta, checker: &DiffChecker{}, hasLibrary: configuration.HasCppLibrary(), LibraryLocation: configuration.CppLibraryLocation}, nil
+		return &CppJudge{Meta: meta, checker: checker, hasLibrary: configuration.HasCppLibrary(), LibraryLocation: configuration.CppLibraryLocation}, nil
 	case "python":
-		return &PythonJudge{Meta: meta, checker: &DiffChecker{}}, nil
+		return &PythonJudge{Meta: meta, checker: checker}, nil
 	}
 	return nil, errors.New(fmt.Sprintf("Cannot find judge for the given lang %s", meta.TaskLang))
 }
 
-func RunAction(_ *cli.Context) error {
+// Resolve the checker by name, otherwise fallback to the DiffChecker
+func getChecker(name string) Checker {
+	if name == "tokens" {
+		return &TokenChecker{}
+	}
+	return &DiffChecker{}
+}
+
+func RunAction(context *cli.Context) error {
 	configuration, err := config.LoadDefaultConfiguration()
 	if err != nil {
 		return err
@@ -503,7 +537,7 @@ func RunAction(_ *cli.Context) error {
 		return err
 	}
 
-	judge, err := NewJudgeFor(egorMeta, configuration)
+	judge, err := NewJudgeFor(egorMeta, configuration, getChecker(context.String("checker")))
 	if err != nil {
 		return err
 	}
@@ -524,8 +558,17 @@ func RunAction(_ *cli.Context) error {
 }
 
 var TestCommand = cli.Command{
-	Name:      "test",
-	Aliases:   []string{"r"},
+	Name:    "test",
+	Aliases: []string{"r"},
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name: "checker",
+			// Add new checker values.
+			Usage:   "Override the default checker, available values (diff, tokens)",
+			Aliases: []string{"io", "fio"},
+			Value:   "diff",
+		},
+	},
 	Usage:     "Run test cases using the provided solution",
 	UsageText: "egor test",
 	Action:    RunAction,
