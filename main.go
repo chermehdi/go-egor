@@ -49,6 +49,7 @@ func main() {
 			&commands.PrintCaseCommand,
 			&commands.TestCommand,
 			&commands.CreateTaskCommand,
+			&commands.BatchCommand,
 		},
 	}
 

@@ -46,6 +46,9 @@ type EgorMeta struct {
 	Outputs   []IoFile
 	TaskFile  string
 	TimeLimit float64
+	// Path to the file containing the batch generator.
+	// Not setting this value implies that the task does not contain a Batch file.
+	BatchFile string
 }
 
 // Resolves the task file given the default language.
@@ -82,6 +85,7 @@ func NewEgorMeta(task Task, config Config) EgorMeta {
 		Outputs:   outputs,
 		TaskFile:  taskFile,
 		TimeLimit: task.TimeLimit,
+		BatchFile: "",
 	}
 }
 
@@ -89,6 +93,17 @@ func NewEgorMeta(task Task, config Config) EgorMeta {
 // the number of inputs
 func (egor *EgorMeta) CountTestCases() int {
 	return len(egor.Inputs)
+}
+
+func (egor *EgorMeta) HasBatch() bool {
+	if egor.BatchFile == "" {
+		return false
+	}
+	// If the path points to some deleted file, it's considered none existing.
+	if _, err := os.Stat(egor.BatchFile); os.IsNotExist(err) {
+		return false
+	}
+	return true
 }
 
 func (egor *EgorMeta) toJson() (string, error) {
