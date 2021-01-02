@@ -7,6 +7,34 @@ import (
 	"io/ioutil"
 )
 
+// This is embeded as a literal string for easy shipping with the binary.
+// We could consider using some new Go feature to embed it as a static resource.
+// At the time of creation of this, this is not a priority.
+const RandH = `
+class Rand {
+public:
+	Rand(int argc, char** argv) {
+	}
+};
+`
+
+const GeneratorTemplate = `
+//
+// Created by egor http://github.com/chermehdi/egor
+// {{if .Author }}
+// @author {{ .Author }}
+{{end}}
+#include <iostream>
+#include <vector>
+#include "rand.h"
+
+using namespace std;
+
+int main(int argc, char** argv) {
+	// Do not remove this line
+	Rand rand(argc, argv);	
+}
+`
 const CppTemplate = `
 //
 // Created by egor http://github.com/chermehdi/egor
