@@ -130,14 +130,14 @@ You can access any of the model fields in the template, and make changes accordi
 - This one is usefull if you are stuck on a problem, your solution gets `WA` and
 you can't figure out a testcase that will make it break.
 - If you know how to write a brute force solution to the problem, egor can help
-  with running the that solution that you know gives the correct answer against
+  with running the solution that you know gives the correct answer against
   your (optimal) solution, and figure out when will they differ.
 
 ### Steps to make a batch test
-- Create a batch configuration
+- Create a batch directory structure: 
 
 ```
-egor batch create --has-brute
+egor batch create 
 ```
 
 Running this will create 3 additional files: 
@@ -153,12 +153,14 @@ Running this will create 3 additional files:
 Once all the files are filled according to their purpose, you can start running
 your batch test using
 
+- Run the batch test:
+
 ```
-egor batch run --tests=10
+egor batch run --tests=100
 ```
 
 the parameter `--tests` tells egor how many times it should run your code,
-a `100` is a good start.
+a `100` is a good start (and it's the default).
 
 If you can't find a failing testcase after this, you can increase the
 `--tests` parameter, or change the generation strategy, (ex: try bigger

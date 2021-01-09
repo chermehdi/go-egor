@@ -61,17 +61,15 @@ func CreateBatch(context *cli.Context) error {
 	if err = compiledTemplate.Execute(genFile, configuration); err != nil {
 		return err
 	}
-	if context.Bool("has-brute") {
-		randH := path.Join(cwd, RandName)
-		// Create the rand.h file
-		if err = ioutil.WriteFile(randH, []byte(templates.RandH), 0755); err != nil {
-			return err
-		}
+	randH := path.Join(cwd, RandName)
+	// Create the rand.h file
+	if err = ioutil.WriteFile(randH, []byte(templates.RandH), 0755); err != nil {
+		return err
+	}
 
-		bruteH := path.Join(cwd, BruteName)
-		if err = ioutil.WriteFile(bruteH, []byte(templates.BruteH), 0755); err != nil {
-			return err
-		}
+	bruteH := path.Join(cwd, BruteName)
+	if err = ioutil.WriteFile(bruteH, []byte(templates.BruteH), 0755); err != nil {
+		return err
 	}
 	// Update the metadata
 	fileName := path.Join(cwd, configuration.ConfigFileName)
@@ -283,14 +281,6 @@ var BatchCommand = cli.Command{
 			Aliases: []string{"c"},
 			Usage:   "Create the template for the batch test",
 			Action:  CreateBatch,
-			Flags: []cli.Flag{
-				&cli.BoolFlag{
-					Name:    "has-brute",
-					Usage:   "Does this solution have a brute force solution",
-					Aliases: []string{"b"},
-					Value:   true,
-				},
-			},
 		},
 		{
 			Name:    "run",
