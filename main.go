@@ -6,6 +6,7 @@ import (
 	"github.com/chermehdi/egor/config"
 	"github.com/urfave/cli/v2"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"os"
 )
@@ -22,6 +23,16 @@ const Egor = `
 
 var EgorTemplate, _ = template.New("egor").Parse(Egor)
 
+// returns true if `--dev` flag has been supplied
+func isDev() bool {
+	for _, v := range os.Args {
+		if v == "--dev" {
+			return true
+		}
+	}
+	return false
+}
+
 func main() {
 	var egor bytes.Buffer
 	configuration, err := config.LoadDefaultConfiguration()
@@ -29,10 +40,15 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	err = EgorTemplate.Execute(&egor, configuration)
+
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	// Disable logging if not in trace mode.
+	if !isDev() {
+		log.SetOutput(ioutil.Discard)
 	}
 
 	app := &cli.App{
@@ -40,6 +56,13 @@ func main() {
 		Usage:       "Run egor -help to print usage",
 		Description: "Competitive programming helper CLI",
 		UsageText:   "Run egor <subcommand> [--flags]*",
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:  "dev",
+				Usage: "Set to true if you want detailed logs, useful in dev mode.",
+				Value: false,
+			},
+		},
 		Commands: []*cli.Command{
 			&commands.ParseCommand,
 			&commands.ConfigCommand,

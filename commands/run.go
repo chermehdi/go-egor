@@ -13,24 +13,12 @@ import (
 	"time"
 
 	"github.com/chermehdi/egor/config"
+	"github.com/chermehdi/egor/utils"
 	"github.com/chermehdi/skimo/skimo"
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/table"
 
 	"github.com/urfave/cli/v2"
-)
-
-var (
-	AC int8 = 0
-	SK int8 = 1
-	RE int8 = 2
-	WA int8 = 3
-	TL int8 = 4
-)
-
-var (
-	OK int8 = 0 // OK execution status
-	TO int8 = 1 // Timed out status
 )
 
 var (
@@ -40,11 +28,6 @@ var (
 	yellow  = color.New(color.FgYellow).SprintfFunc()
 	blue    = color.New(color.FgBlue).SprintfFunc()
 )
-
-const WorkDir = "work"
-
-// Time out delta in miliseconds
-const TimeOutDelta float64 = 25.0
 
 // Checks the output of a given testcase against it's expected output
 type Checker interface {
@@ -177,15 +160,15 @@ func (c *ConsoleJudgeReport) Add(status CaseStatus, description CaseDescription)
 // Utility function to get the string representation of some given status.
 func getDisplayStatus(status int8) string {
 	switch status {
-	case AC:
+	case config.AC:
 		return green("AC")
-	case RE:
+	case config.RE:
 		return magenta("RE")
-	case SK:
+	case config.SK:
 		return yellow("SK")
-	case WA:
+	case config.WA:
 		return red("WA")
-	case TL:
+	case config.TL:
 		return blue("TL")
 	}
 	return "Unknown"
@@ -225,26 +208,6 @@ func newJudgeReport() JudgeReport {
 	return &ConsoleJudgeReport{Stats: []CaseStatus{}}
 }
 
-// Utility function to execute a given command and insure to stop it after a timeOut (in miliseconds).
-// The function returns the status of the execution, the duration of the exeuction, and an error (if any).
-func timedExecution(cmd *exec.Cmd, timeOut float64) (int8, time.Duration, error) {
-	cmd.Start()
-	start := time.Now()
-	done := make(chan error)
-	go func() { done <- cmd.Wait() }()
-
-	timeout := time.After(time.Duration(timeOut) * time.Millisecond)
-	select {
-	case <-timeout:
-		elapsed := time.Since(start)
-		cmd.Process.Kill()
-		return TO, elapsed, nil
-	case err := <-done:
-		elapsed := time.Since(start)
-		return OK, elapsed, err
-	}
-}
-
 // Utility function to execute the given command that is associated with the given judge
 // the method returns the case status and the error (if any)
 func execute(judge Judge, desc CaseDescription, command string, args ...string) (CaseStatus, error) {
@@ -253,7 +216,7 @@ func execute(judge Judge, desc CaseDescription, command string, args ...string) 
 	inputFile, err := os.Open(desc.InputFile)
 	if err != nil {
 		return CaseStatus{
-			Status:       RE,
+			Status:       config.RE,
 			CheckerError: nil,
 		}, err
 	}
@@ -262,7 +225,7 @@ func execute(judge Judge, desc CaseDescription, command string, args ...string) 
 	outputFile, err := os.OpenFile(desc.WorkFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
 	if err != nil {
 		return CaseStatus{
-			Status:       RE,
+			Status:       config.RE,
 			CheckerError: nil,
 		}, err
 	}
@@ -273,10 +236,10 @@ func execute(judge Judge, desc CaseDescription, command string, args ...string) 
 	cmd.Stdout = outputFile
 	cmd.Stderr = &stderrBuffer
 
-	status, duration, err := timedExecution(cmd, desc.TimeLimit+TimeOutDelta)
-	if status == TO {
+	status, duration, err := utils.ExecuteWithTimeout(cmd, desc.TimeLimit+config.TimeOutDelta)
+	if status == config.TO {
 		return CaseStatus{
-			Status:       TL,
+			Status:       config.TL,
 			CheckerError: nil,
 			Stderr:       stderrBuffer.String(),
 			Duration:     duration,
@@ -285,7 +248,7 @@ func execute(judge Judge, desc CaseDescription, command string, args ...string) 
 
 	if err != nil {
 		return CaseStatus{
-			Status:       RE,
+			Status:       config.RE,
 			CheckerError: nil,
 			Stderr:       stderrBuffer.String(),
 			Duration:     duration,
@@ -295,7 +258,7 @@ func execute(judge Judge, desc CaseDescription, command string, args ...string) 
 	expectedOutput, err := ioutil.ReadFile(desc.OutputFile)
 	if err != nil {
 		return CaseStatus{
-			Status:       RE,
+			Status:       config.RE,
 			CheckerError: nil,
 			Duration:     duration,
 		}, err
@@ -304,7 +267,7 @@ func execute(judge Judge, desc CaseDescription, command string, args ...string) 
 
 	if err != nil {
 		return CaseStatus{
-			Status:       RE,
+			Status:       config.RE,
 			CheckerError: nil,
 			Duration:     duration,
 		}, err
@@ -312,14 +275,14 @@ func execute(judge Judge, desc CaseDescription, command string, args ...string) 
 	err = judge.Checker().Check(string(output), string(expectedOutput))
 	if err != nil {
 		return CaseStatus{
-			Status:       WA,
+			Status:       config.WA,
 			CheckerError: err,
 			Stderr:       stderrBuffer.String(),
 			Duration:     duration,
 		}, err
 	}
 	return CaseStatus{
-		Status:       AC,
+		Status:       config.AC,
 		CheckerError: nil,
 		Stderr:       stderrBuffer.String(),
 		Duration:     duration,
@@ -340,7 +303,7 @@ func (judge *JavaJudge) Setup() error {
 	if err != nil {
 		return err
 	}
-	workDirPath := path.Join(currentDir, WorkDir)
+	workDirPath := path.Join(currentDir, config.WorkDir)
 	if _, err = os.Stat(workDirPath); os.IsNotExist(err) {
 		if err := os.Mkdir(workDirPath, 0777); err != nil {
 			return err
@@ -349,7 +312,7 @@ func (judge *JavaJudge) Setup() error {
 	//TODO(chermehdi): make the executables path configurable #14
 	// Compilation for Java
 	var stderrBuffer bytes.Buffer
-	cmd := exec.Command("javac", judge.Meta.TaskFile, "-d", WorkDir)
+	cmd := exec.Command("javac", judge.Meta.TaskFile, "-d", config.WorkDir)
 	cmd.Dir = currentDir
 	cmd.Stderr = &stderrBuffer
 	if err = cmd.Run(); err != nil {
@@ -417,7 +380,7 @@ func (judge *CppJudge) Setup() error {
 	if err != nil {
 		return err
 	}
-	workDirPath := path.Join(currentDir, WorkDir)
+	workDirPath := path.Join(currentDir, config.WorkDir)
 	if _, err = os.Stat(workDirPath); os.IsNotExist(err) {
 		if err := os.Mkdir(workDirPath, 0777); err != nil {
 			return err
@@ -459,7 +422,6 @@ func (judge *CppJudge) WorkDir() string {
 }
 
 func (judge *CppJudge) RunTestCase(desc CaseDescription) CaseStatus {
-	// We suppose that all java executables will be called Main
 	caseStatus, _ := execute(judge, desc, "./sol")
 	return caseStatus
 }

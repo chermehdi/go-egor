@@ -124,6 +124,47 @@ type TemplateContext struct {
 ```
 You can access any of the model fields in the template, and make changes accordingly dependending on your preferences.
 - Running the command `egor config set config.templates.{lang} /path/to/template/file` will register the given template and will use it for the given language for future tasks.
+
+## Batch testing
+
+- This one is usefull if you are stuck on a problem, your solution gets `WA` and
+you can't figure out a testcase that will make it break.
+- If you know how to write a brute force solution to the problem, egor can help
+  with running the that solution that you know gives the correct answer against
+  your (optimal) solution, and figure out when will they differ.
+
+### Steps to make a batch test
+- Create a batch configuration
+
+```
+egor batch create --has-brute
+```
+
+Running this will create 3 additional files: 
+
+- `gen.cpp`: which is the random input generator, this include a small random
+  generation library `"rand.h"`, feel free to use it to generate testcases for
+  the given problem.
+- `main_brute.cpp`: which will act as the brute force solution.
+- `rand.h`: the random generation library, contains a bunch of helper methods
+  to generate random input, read the source and docs on public methods for
+  additional info.
+
+Once all the files are filled according to their purpose, you can start running
+your batch test using
+
+```
+egor batch run --tests=10
+```
+
+the parameter `--tests` tells egor how many times it should run your code,
+a `100` is a good start.
+
+If you can't find a failing testcase after this, you can increase the
+`--tests` parameter, or change the generation strategy, (ex: try bigger
+/ smaller numbers), egor will give your program a random seed every time it runs
+the generator, so that it generates a new testcase with every run.
+
 ## Contribution
 
 - Contribution to the project can be done in multiple ways, you can report bugs and issues or you can discuss new features that you like being added in future versions by creating a new issue
