@@ -7,6 +7,17 @@ import (
 	"io/ioutil"
 )
 
+const BruteH = `
+#include <iostream>
+#include <vector>
+#include <set>
+
+using namespace std;
+
+int main() {
+}
+`
+
 // This is embeded as a literal string for easy shipping with the binary.
 // We could consider using some new Go feature to embed it as a static resource.
 // At the time of creation of this, this is not a priority.

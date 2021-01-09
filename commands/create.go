@@ -109,7 +109,7 @@ func CreateTaskAction(context *cli.Context) error {
 		Output: config.IOType{
 			Type: "stdout",
 		},
-		Languages: nil,
+		Languages: map[string]config.LanguageDescription{},
 	}
 	configuration, err := config.LoadDefaultConfiguration()
 	if err != nil {
