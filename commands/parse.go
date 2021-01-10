@@ -23,6 +23,7 @@ import (
 
 const listenAddr = ":4243"
 
+// TaskExistsError is an rror indicating the task directory exists. Used to be able to skip task creation and move the next one when parsing a contest.
 var TaskExistsError = errors.New("Task already exists, creation skipped!")
 
 // Serialize task into a JSON string.
@@ -138,6 +139,8 @@ func createWebServer(quit chan<- string) *http.Server {
 
 func waitForShutDown(server *http.Server, done chan<- string, quit <-chan string, problemsCount int) {
 
+	// readProblems is a function that waits for problemsCount problems json to be sent to the server and push them to the consumer.
+	// Also to be able to close producer and consumer channels one all problems are read (Or timed out).
 	readProblems := func() <-chan string {
 		results := make(chan string, problemsCount)
 		defer close(results)
@@ -161,6 +164,7 @@ func waitForShutDown(server *http.Server, done chan<- string, quit <-chan string
 		return results
 	}
 
+	// function to consume list of all received problems and then close the channel.
 	consumeProblems := func(results <-chan string) {
 		defer close(done)
 		for result := range results {
@@ -168,6 +172,7 @@ func waitForShutDown(server *http.Server, done chan<- string, quit <-chan string
 		}
 	}
 
+	// Receive and consume the list of all problems and close the channels
 	problems := readProblems()
 	consumeProblems(problems)
 
