@@ -267,7 +267,7 @@ var ParseCommand = cli.Command{
 		},
 		&cli.BoolFlag{
 			Name:    "contest",
-			Usage:   "Indicates if this is a contest to parse",
+			Usage:   "Indicates if this is a contest to parse. The number of problems should follow (Defaulted to 1). Example: egor parse --contest 5.",
 			Aliases: []string{"c"},
 			Value:   false,
 		},

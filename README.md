@@ -20,7 +20,7 @@ and help execute tests locally via their favorite programming language.
 ## Features
 
 - The current supported command list is outlined here, and you can find out more details in the docs page.
-    - `egor parse`: Starts listening for competitive companion chrome plugin to parse the task
+    - `egor parse`: Starts listening for competitive companion chrome plugin to parse a task or a contest.
     - `egor test`: Runs the tests of the current task and outputs the results.
     - `egor config`: Read/Change global configuration parameters.
     - `egor testcase`: Add a custom test case to this egor task.
@@ -28,7 +28,7 @@ and help execute tests locally via their favorite programming language.
     - `egor printcase`: Print input and or output of a given test case.
     - `egor copy`: Copies the current task to the clipboard.
     - `egor help`: Display help for command.
-    - `egor batch (in developement)`: Tests the main solution for this task against another solution (probably written in another language than the main one)
+    - `egor batch`: Tests the main solution for this task against another solution (probably written in another language than the main one)
     by running both of them and feeding them the tests for this task, this is useful if you have a brute force solution and an efficient solution
     and you want to validate the optimal solution against the one you are sure that is working.
     
