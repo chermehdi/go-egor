@@ -4,13 +4,14 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"os"
+	"path"
+	"strconv"
+
 	"github.com/chermehdi/egor/config"
 	"github.com/chermehdi/egor/utils"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
-	"os"
-	"path"
-	"strconv"
 )
 
 func GetTestCase(egorMeta config.EgorMeta, id int) *TestCaseIO {
@@ -88,7 +89,7 @@ func PrintCaseAction(context *cli.Context) error {
 
 	if err != nil {
 		color.Red(fmt.Sprintf("Cannot parse test id = '%s', a number required!", context.Args().Get(0)))
-		return errors.New(fmt.Sprintf("Failed to parse test id = %s", context.Args().Get(0)))
+		return fmt.Errorf("Failed to parse test id = %s", context.Args().Get(0))
 	}
 
 	cwd, err := os.Getwd()
@@ -113,7 +114,7 @@ func PrintCaseAction(context *cli.Context) error {
 	testCase := GetTestCase(metaData, id)
 	if testCase == nil {
 		color.Red(fmt.Sprintf("Could not find test case with id = %d", id))
-		return errors.New(fmt.Sprintf("Unknown test case with id %d", id))
+		return fmt.Errorf("Unknown test case with id %d", id)
 	}
 
 	if !context.Bool("output-only") {
@@ -127,7 +128,7 @@ func PrintCaseAction(context *cli.Context) error {
 	return nil
 }
 
-// Command to print a test case. this command can be used to print inputs and/or outputs
+// PrintCaseCommand Command to print a test case. this command can be used to print inputs and/or outputs
 // to the consol. The user can choose to print the input only or the output only. The
 // user should provide a valid test id.
 // Running this command will fetch egor meta data, get the test case with the given id,

@@ -2,7 +2,6 @@ package config
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -15,7 +14,7 @@ import (
 
 const LatestVersion = "1.0.0"
 
-// The configuration of the CLI
+// Config The configuration of the CLI
 type Config struct {
 	Server struct {
 		Port int `yaml:"port"`
@@ -64,7 +63,7 @@ func createDefaultConfiguration() *Config {
 	}
 }
 
-// This function is called when the configuration file does not exist already
+// SaveConfiguration This function is called when the configuration file does not exist already
 // This will create the configuration file in the user config dir, with a minimalistic
 // default configuration
 func SaveConfiguration(config *Config) error {
@@ -81,7 +80,7 @@ func SaveConfiguration(config *Config) error {
 	return ioutil.WriteFile(location, buffer.Bytes(), 0777)
 }
 
-// Returns the Configuration object associated with
+// LoadConfiguration Returns the Configuration object associated with
 // the path given as a parameter
 func LoadConfiguration(location string) (*Config, error) {
 	file, err := os.Open(location)
@@ -104,7 +103,7 @@ func LoadConfiguration(location string) (*Config, error) {
 	return &config, nil
 }
 
-// Returns the Configuration object associated with
+// LoadDefaultConfiguration Returns the Configuration object associated with
 // the default configuration location
 func LoadDefaultConfiguration() (*Config, error) {
 	location, err := getDefaultConfigLocation()
@@ -122,7 +121,7 @@ func LoadDefaultConfiguration() (*Config, error) {
 	return LoadConfiguration(location)
 }
 
-// Gets the configuration value associated with the given key
+// GetConfigurationValue Gets the configuration value associated with the given key
 func GetConfigurationValue(config *Config, key string) (string, error) {
 	lowerKey := strings.ToLower(key)
 	if lowerKey == "server.port" {
@@ -134,6 +133,6 @@ func GetConfigurationValue(config *Config, key string) (string, error) {
 	} else if lowerKey == "cpp.lib.location" {
 		return config.CppLibraryLocation, nil
 	} else {
-		return "", errors.New(fmt.Sprintf("Unknown config key %s", key))
+		return "", fmt.Errorf("Unknown config key %s", key)
 	}
 }

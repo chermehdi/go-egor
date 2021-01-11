@@ -2,16 +2,17 @@ package commands
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path"
+
 	"github.com/atotto/clipboard"
 	"github.com/chermehdi/egor/config"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
-	"io/ioutil"
-	"os"
-	"path"
 )
 
-// Load the content of a given file
+// GetFileContent Load the content of a given file
 func GetFileContent(filePath string) (string, error) {
 	filebytes, err := ioutil.ReadFile(filePath)
 	if err != nil {
@@ -65,7 +66,7 @@ func CopyAction(*cli.Context) error {
 	return nil
 }
 
-// Command to copy task source file to clipboard for easy submit.
+// CopyCommand Command to copy task source file to clipboard for easy submit.
 // Running this command will fetch egor meta data, get the content of the task source
 // and then copy the content to the clipboard.
 var CopyCommand = cli.Command{
