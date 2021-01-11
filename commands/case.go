@@ -3,12 +3,13 @@ package commands
 import (
 	"bufio"
 	"fmt"
-	"github.com/chermehdi/egor/config"
-	"github.com/fatih/color"
-	"github.com/urfave/cli/v2"
 	"os"
 	"path"
 	"strconv"
+
+	"github.com/chermehdi/egor/config"
+	"github.com/fatih/color"
+	"github.com/urfave/cli/v2"
 )
 
 // Read from stdin till ctrl D or Command D
@@ -44,7 +45,7 @@ func writeLinesToFile(filename string, lines []string) error {
 	return nil
 }
 
-// Create and save user specified custom case input, and update the given egor meta data
+// AddNewCaseInput Create and save user specified custom case input, and update the given egor meta data
 func AddNewCaseInput(inputLines []string,
 	caseName string,
 	metaData config.EgorMeta) (config.EgorMeta, error) {
@@ -60,7 +61,7 @@ func AddNewCaseInput(inputLines []string,
 	return metaData, nil
 }
 
-// Create and save user specified custom csae output, and update the given egor meta data
+// AddNewCaseOutput Create and save user specified custom csae output, and update the given egor meta data
 func AddNewCaseOutput(outputLines []string,
 	caseName string,
 	metaData config.EgorMeta) (config.EgorMeta, error) {
@@ -76,7 +77,7 @@ func AddNewCaseOutput(outputLines []string,
 	return metaData, nil
 }
 
-// Create a user custom test case
+// CustomCaseAction Create a user custom test case
 func CustomCaseAction(context *cli.Context) error {
 	color.Green("Creating Custom Test Case...")
 
@@ -132,7 +133,7 @@ func CustomCaseAction(context *cli.Context) error {
 	return nil
 }
 
-// Command to add costum test cases to the current task.
+// CaseCommand Command to add costum test cases to the current task.
 // Running this command will ask the user to provide their input and output, then
 // saves the new test case data into appropriate files and add their meta data into
 // the current task egor meta data.

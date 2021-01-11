@@ -3,12 +3,13 @@ package commands
 import (
 	"bufio"
 	"fmt"
-	"github.com/chermehdi/egor/config"
-	"github.com/fatih/color"
-	"github.com/urfave/cli/v2"
 	"io"
 	"os"
 	"strings"
+
+	"github.com/chermehdi/egor/config"
+	"github.com/fatih/color"
+	"github.com/urfave/cli/v2"
 )
 
 func ReadLine(reader io.Reader) string {
@@ -93,7 +94,7 @@ func fillTaskFromQuestions(task *config.Task, reader io.Reader) error {
 	return nil
 }
 
-// Creates a task directory structure, either in a default manner (a task with a generic name, and default settings).
+// CreateTaskAction Creates a task directory structure, either in a default manner (a task with a generic name, and default settings).
 // Or by specifying the values in an interactive manner, if `-i` flag is specified.
 func CreateTaskAction(context *cli.Context) error {
 	// Default task containing default values.
@@ -133,7 +134,7 @@ func CreateTaskAction(context *cli.Context) error {
 	return nil
 }
 
-// Command will ask the user for a bunch of questions about the task name
+// CreateTaskCommand Command will ask the user for a bunch of questions about the task name
 // Input and outputs and other metadata required to create the task
 var CreateTaskCommand = cli.Command{
 	Name:      "create",

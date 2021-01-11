@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -31,12 +30,12 @@ func UpdateConfiguration(config *config.Config, key, value string) error {
 		config.CustomTemplate[lang] = value
 	} else {
 		// Unknow key
-		return errors.New(fmt.Sprintf("Unknown configuration property %s", key))
+		return fmt.Errorf("Unknown configuration property %s", key)
 	}
 	return nil
 }
 
-// Sets the configuration property identified by the first argument
+// SetAction Sets the configuration property identified by the first argument
 // To the value identified by the second argument.
 // Note: The configuration keys are not case sensitive, if a configuration key provided
 // is not recognized, an error is thrown
@@ -44,7 +43,7 @@ func SetAction(context *cli.Context) error {
 	argLen := context.Args().Len()
 	if argLen != 2 {
 		color.Red(fmt.Sprintln("Usage egor config set key value"))
-		return errors.New(fmt.Sprintf("Expected 2 parameters, got %d", argLen))
+		return fmt.Errorf("Expected 2 parameters, got %d", argLen)
 	}
 	key, value := context.Args().Get(0), context.Args().Get(1)
 
@@ -59,13 +58,13 @@ func SetAction(context *cli.Context) error {
 	return config.SaveConfiguration(configuration)
 }
 
-// Gets and prints the current configuration associted to the first argument,
+// GetAction Gets and prints the current configuration associted to the first argument,
 // or Prints all if no argument is specified
 func GetAction(context *cli.Context) error {
 	argLen := context.Args().Len()
 	if argLen > 1 {
 		color.Red(fmt.Sprintln("Usage egor config get <key?>"))
-		return errors.New(fmt.Sprintf("Expected at most 1 parameter, got %d", argLen))
+		return fmt.Errorf("Expected at most 1 parameter, got %d", argLen)
 	}
 	configuration, err := config.LoadDefaultConfiguration()
 	if err != nil {

@@ -1,12 +1,13 @@
 package commands
 
 import (
+	"os"
+	"path"
+
 	"github.com/chermehdi/egor/config"
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/urfave/cli/v2"
-	"os"
-	"path"
 )
 
 type TestCaseIO struct {
@@ -17,7 +18,7 @@ type TestCaseIO struct {
 	Custom     bool
 }
 
-// parse input and output from egor meta to TestCase
+// GetTestCases parse input and output from egor meta to TestCase
 func GetTestCases(egorMeta config.EgorMeta) []*TestCaseIO {
 	testCasesMap := make(map[string]*TestCaseIO)
 	testCases := make([]*TestCaseIO, 0)
@@ -42,7 +43,7 @@ func GetTestCases(egorMeta config.EgorMeta) []*TestCaseIO {
 	return testCases
 }
 
-// print test cases table
+// PrintTestCasesTable print test cases table
 func PrintTestCasesTable(testCases []*TestCaseIO) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
@@ -60,12 +61,12 @@ func PrintTestCasesTable(testCases []*TestCaseIO) {
 	t.Render()
 }
 
-// print task test cases
+// PrintTestCases print task test cases
 func PrintTestCases(egorMeta config.EgorMeta) {
 	PrintTestCasesTable(GetTestCases(egorMeta))
 }
 
-// list test cases information command action
+// ShowCasesAction list test cases information command action
 // TODO(Eroui): [Refactoring] Duplicate code while loading meta data, consider refactoring...
 func ShowCasesAction(_ *cli.Context) error {
 	cwd, err := os.Getwd()
@@ -95,7 +96,7 @@ func ShowCasesAction(_ *cli.Context) error {
 	return nil
 }
 
-// Command to print the list of test cases input and outputs into the consol.
+// ShowCasesCommand Command to print the list of test cases input and outputs into the consol.
 // Running this command will fetch egor meta data and load all inputs and outputs meta data
 // and prints it as an array into the consol.
 var ShowCasesCommand = cli.Command{

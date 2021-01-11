@@ -2,7 +2,6 @@ package commands
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -43,7 +42,7 @@ type DiffChecker struct {
 func (c *DiffChecker) Check(got, expected string) error {
 	// Compare the trimmed output from both input and output
 	if strings.TrimRight(got, " \t\n\r") != strings.TrimRight(expected, " \t\n\r") {
-		return errors.New(fmt.Sprintf("Checker failed, expected:\n%s\nfound:\n%s", expected, got))
+		return fmt.Errorf("Checker failed, expected:\n%s\nfound:\n%s", expected, got)
 	}
 	return nil
 }
@@ -58,15 +57,15 @@ func (c *TokenChecker) Check(got, expected string) error {
 	inputTokens := strings.Fields(got)
 	outputTokens := strings.Fields(expected)
 	if len(inputTokens) != len(outputTokens) {
-		return errors.New(fmt.Sprintf("Checker failed, number of tokens different: expected %d, got %d\n\r",
-			len(outputTokens), len(inputTokens)))
+		return fmt.Errorf("Checker failed, number of tokens different: expected %d, got %d\n\r",
+			len(outputTokens), len(inputTokens))
 	}
 	i := 0
 	n := len(inputTokens)
 	for i < n {
 		if inputTokens[i] != outputTokens[i] {
-			return errors.New(fmt.Sprintf("Checker failed, token %d does not match: expected %s, got %s\n\r",
-				i, outputTokens[i], inputTokens[i]))
+			return fmt.Errorf("Checker failed, token %d does not match: expected %s, got %s\n\r",
+				i, outputTokens[i], inputTokens[i])
 		}
 		i = i + 1
 	}
@@ -473,7 +472,7 @@ func NewJudgeFor(meta config.EgorMeta, configuration *config.Config, checker Che
 	case "python":
 		return &PythonJudge{Meta: meta, checker: checker}, nil
 	}
-	return nil, errors.New(fmt.Sprintf("Cannot find judge for the given lang %s", meta.TaskLang))
+	return nil, fmt.Errorf("Cannot find judge for the given lang %s", meta.TaskLang)
 }
 
 // Resolve the checker by name, otherwise fallback to the DiffChecker

@@ -23,10 +23,10 @@ import (
 
 const listenAddr = ":4243"
 
-// TaskExistsError is an rror indicating the task directory exists. Used to be able to skip task creation and move the next one when parsing a contest.
-var TaskExistsError = errors.New("Task already exists, creation skipped!")
+// ErrTaskExists is an rror indicating the task directory exists. Used to be able to skip task creation and move the next one when parsing a contest.
+var ErrTaskExists = errors.New("Task already exists, creation skipped!")
 
-// Serialize task into a JSON string.
+// SerializeTask Serialize task into a JSON string.
 func SerializeTask(meta EgorMeta) (string, error) {
 	var buffer bytes.Buffer
 	encoder := json2.NewEncoder(&buffer)
@@ -40,7 +40,7 @@ func CreateDirectoryStructure(task Task, config Config, rootDir string, context 
 	taskDir := path.Join(rootDir, task.Name)
 	if err := os.Mkdir(taskDir, 0777); err != nil {
 		if os.IsExist(err) {
-			return "", TaskExistsError
+			return "", ErrTaskExists
 		}
 		return "", err
 	}
@@ -234,7 +234,7 @@ func ParseAction(context *cli.Context) error {
 
 		taskDir, err := CreateDirectoryStructure(*task, *config, cwd, context)
 		if err != nil {
-			if err == TaskExistsError {
+			if err == ErrTaskExists {
 				color.Magenta("Skipping creating task %s as it already exists", task.Name)
 				continue
 			} else {
@@ -249,7 +249,7 @@ func ParseAction(context *cli.Context) error {
 	return nil
 }
 
-// Command to parse tasks from the `Competitive Companion` Chrome extension.
+// ParseCommand Command to parse tasks from the `Competitive Companion` Chrome extension.
 // Running this command, will start a server on the default port that the extension
 // uses, and will create a directory structure containing input files, expected output files,
 // and an additional `egor-meta.json` file, and finally your task file, which is usually a `main.cpp` or `Main.java`
