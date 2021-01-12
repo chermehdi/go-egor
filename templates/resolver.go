@@ -22,10 +22,114 @@ int main() {
 // We could consider using some new Go feature to embed it as a static resource.
 // At the time of creation of this, this is not a priority.
 const RandH = `
+#pragma once
+
+#include <ctime>
+#include <string>
+
+enum CASE {
+	LOWERCASE,
+	UPPERCASE,
+	MIXEDCASE
+};
+
 class Rand {
-public:
-	Rand(int argc, char** argv) {
+private:
+	int seed;
+
+	void init() {
+		srand(seed);
 	}
+
+	void readArgs(int argc, char * argv[]) {
+		if (argc > 0) {
+			seed = std::stoi(argv[1]);
+		} else {
+			seed = 0;
+		}
+	}
+
+public:
+	Rand(int _seed) : seed(_seed) {
+		init();
+	}
+
+	Rand(int argc, char* argv[]) {
+		readArgs(argc, argv);
+		init();
+	}
+
+	// Numbers
+
+	int Int(int from, int to) {
+		return rand() % (to - from) + from;
+	}
+
+	long Long(long from, long to) {
+		return rand() % (to - from) + from;
+	}
+
+	long long LongLong(long long from, long long to) {
+		return rand() % (to - from) + from;
+	}
+
+	double Double(double from, double to) {
+		double tmp = (double) rand() / RAND_MAX;
+		return from + tmp * (to - from);
+	}
+
+	// Chars
+
+	char Lower(char from = 'a', char to = 'z') {
+		return Char(from, to);
+	}
+
+	char Upper(char from = 'A', char to = 'Z') {
+		return Char(from, to);
+	}
+
+	char Alpha(char from = 'a', char to = 'z') {
+		int k = rand() % 52;
+		if (k < 26) return Lower('a', 'a' + k);
+		return Upper('a', 'a' + k % 26);
+	}
+
+	char Digit(char from = '0', char to = '9') {
+		return Char(from, to);
+	}
+
+	char Char(char from, char to) {
+		return static_cast <char> (Int(from, to));
+	}
+
+	// Strings
+
+	std::string String(size_t size, CASE mode = MIXEDCASE) {
+		std::string res(size, ' ');
+
+		switch (mode) {
+			case LOWERCASE:
+				for (char& c : res) {
+					c = Lower();
+				}
+				break;
+			case UPPERCASE:
+				for (char& c : res) {
+					c = Upper();
+				}
+				break;
+			case MIXEDCASE:
+				for (char &c : res) {					
+					c = Alpha();
+				}
+				break;
+			default:
+				break;
+		}
+
+		return res;
+	}
+
 };
 `
 
