@@ -37,8 +37,8 @@ const std::string DIGITS_SET = "0123456789";
 
 // Used to determine the set of allowed characters
 // for the String method of the Rand class
-const int LOWER  = 1;
-const int UPPER  = 1 << 1;
+const int LOWER = 1;
+const int UPPER = 1 << 1;
 const int DIGITS = 1 << 2;
 
 // Returns a random value of the following types
@@ -48,9 +48,9 @@ const int DIGITS = 1 << 2;
 // Rand rand(argc, argv);
 // int randomInt = rand.Int();
 // string randomString = rand.String(10, DIGITS);
-// 
+//
 // @author NouemanKHAL
-// 
+//
 class Rand {
   unsigned int seed;
 
@@ -61,7 +61,7 @@ class Rand {
     return 0;
   }
 
-public:
+ public:
   Rand(unsigned int _seed = 0) : seed(_seed) { srand(seed); }
 
   Rand(int argc, char* argv[]) {
@@ -70,20 +70,20 @@ public:
   }
 
   // Returns an random int value in the range [from, to] inclusive
-  int Int(int from, int to) { 
-		assert(from <= to);
-		return rand() % (to - from) + from; 
-	}
+  int Int(int from, int to) {
+    assert(from <= to);
+    return rand() % (to - from) + from;
+  }
 
   // Returns an random long long value in the range [from, to] inclusive
   long long Long(long long from, long long to) {
-		assert(from <= to);
+    assert(from <= to);
     return rand() % (to - from) + from;
   }
 
   // Returns an random double value in the range [from, to] inclusive
   double Double(double from, double to) {
-		assert(from <= to);
+    assert(from <= to);
     double tmp = (double)rand() / RAND_MAX;
     return from + tmp * (to - from);
   }
@@ -91,7 +91,7 @@ public:
   // Returns an random char value in the range [from, to] inclusive
   // Parameters are optional
   char Char(char from = CHAR_MIN, char to = CHAR_MAX) {
-		assert(from <= to);
+    assert(from <= to);
     return static_cast<char>(Int(from, to));
   }
 
@@ -119,21 +119,19 @@ public:
   // Returns an random digit character
   // Parameters are optional, by default returns a random digit character in the
   // range ['0', '9'] inclusive
-  char Digit(char from = '0', char to = '9') { 
-		assert(from <= to);
-		return Char(from, to); 
-	}
+  char Digit(char from = '0', char to = '9') {
+    assert(from <= to);
+    return Char(from, to);
+  }
 
   // Returns a random alphanumerical character
   char AlphaNum() {
     if (rand() & 1) return Alpha();
     return Digit();
   }
-	
-	// Returns a random boolean value.
-	bool Bool() {
-		return bool(rand() & 1);
-	}
+
+  // Returns a random boolean value.
+  bool Bool() { return bool(rand() & 1); }
 
   // Returns an std::string of length size consisting only of characters allowed
   // in the given mask using the constants LOWER, UPPER, DIGITS Example: Rand
