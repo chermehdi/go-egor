@@ -71,13 +71,15 @@ class Rand {
 
   // Returns an random int value in the range [from, to] inclusive
   int Int(int from, int to) {
-    assert(from <= to);
+	  if (from == to) return from;
+    assert(from < to);
     return rand() % (to - from) + from;
   }
 
   // Returns an random long long value in the range [from, to] inclusive
   long long Long(long long from, long long to) {
-    assert(from <= to);
+	  if (from == to) return from;
+    assert(from < to);
     return rand() % (to - from) + from;
   }
 
@@ -214,17 +216,16 @@ import java.io.*;
  * {{end}}
  */
 public class Main {
-
-	void solve(Scanner in, PrintWriter out) {
-
-	}
-
-	public static void main(String[] args) {
-			try(Scanner in = new Scanner(System.in);
-					PrintWriter out = new PrintWriter(System.out)) {
-					new Main().solve(in, out);
-			}
-	}
+  void solve(Scanner in, PrintWriter out) {
+  
+  }
+  
+  public static void main(String[] args) {
+		try(Scanner in = new Scanner(System.in);
+			PrintWriter out = new PrintWriter(System.out)) {
+			new Main().solve(in, out);
+		}
+  }
 }
 `
 
