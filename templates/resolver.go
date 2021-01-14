@@ -166,7 +166,7 @@ class Rand {
 
     return res;
   }
-}
+};
 `
 
 const GeneratorTemplate = `
