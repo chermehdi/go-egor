@@ -111,15 +111,17 @@ func CustomCaseAction(context *cli.Context) error {
 		return err
 	}
 
+	outputLines := []string{}
 	if !context.Bool("no-output") {
 		color.Green("Provide your output:")
-		outputLines := readFromStdin()
-		metaData, err = AddNewCaseOutput(outputLines, caseName, metaData)
+		outputLines = readFromStdin()
+	}
 
-		if err != nil {
-			color.Red("Failed to add new case output")
-			return err
-		}
+	metaData, err = AddNewCaseOutput(outputLines, caseName, metaData)
+
+	if err != nil {
+		color.Red("Failed to add new case output")
+		return err
 	}
 
 	err = metaData.SaveToFile(path.Join(cwd, configFileName))
