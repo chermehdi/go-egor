@@ -141,6 +141,8 @@ class Rand {
   // an std::string of size 10 consisting only of lowercase letters and digits
   std::string String(size_t size, const int mask = LOWER | UPPER) {
     std::string charset;
+    std::random_device rd;
+    std::mt19937 g(rd());
 
     // Building the set of allowed charset from the mask
     if (mask & LOWER) {
@@ -153,7 +155,7 @@ class Rand {
       charset += DIGITS_SET;
     }
 
-    std::random_shuffle(charset.begin(), charset.end());
+    std::shuffle(charset.begin(), charset.end(), g);
 
     std::string res(size, ' ');
 
