@@ -132,6 +132,9 @@ func GetConfigurationValue(config *Config, key string) (string, error) {
 		return config.Author, nil
 	} else if lowerKey == "cpp.lib.location" {
 		return config.CppLibraryLocation, nil
+	} else if strings.HasPrefix(key,"config.templates") {
+    lang := key[strings.LastIndex(key,".") + 1:]
+    return config.CustomTemplate[lang], nil
 	} else {
 		return "", fmt.Errorf("Unknown config key %s", key)
 	}
