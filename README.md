@@ -123,7 +123,8 @@ type TemplateContext struct {
 }
 ```
 You can access any of the model fields in the template, and make changes accordingly dependending on your preferences.
-- Running the command `egor config set config.templates.{lang} /path/to/template/file` will register the given template and will use it for the given language for future tasks.
+- Running the command `egor config set custom.templates.{lang} /path/to/template/file` will register the given template and will use it for the given language for future tasks.
+You can also see what is the current custom template for your language by running `egor config get config.templates`
 
 ## Batch testing
 
