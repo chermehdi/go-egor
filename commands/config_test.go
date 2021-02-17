@@ -16,6 +16,7 @@ func getDefaultConfiguration() *config.Config {
 		Lang: struct {
 			Default string `yaml:"default"`
 		}{Default: "cpp"},
+		CustomTemplate: make(map[string]string),
 	}
 }
 
@@ -29,6 +30,9 @@ func TestSetConfiguration(t *testing.T) {
 
 	_ = UpdateConfiguration(configuration, "lang.default", "java")
 	assert.Equal(t, configuration.Lang.Default, "java")
+
+    _ = UpdateConfiguration(configuration, "custom.templates.cpp", "/home/user/custom.cpp")
+    assert.Equal(t, configuration.CustomTemplate["cpp"], "/home/user/custom.cpp")
 }
 
 func TestSetConfigurationUnknownKey(t *testing.T) {
