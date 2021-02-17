@@ -66,6 +66,9 @@ func TestGetConfigurationValue(t *testing.T) {
 
 	_, err = GetConfigurationValue(config, "unknown.key")
 	assert.Error(t, err, "An error is returned if the configuration key is not known")
+
+    value, err = GetConfigurationValue(config, "config.templates")
+    assert.NoError(t, err,"No error should be thrown when getting custom template")
 }
 
 func TestConfig_HasCppLibrary(t *testing.T) {
