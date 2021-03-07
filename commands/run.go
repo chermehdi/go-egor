@@ -527,7 +527,7 @@ var TestCommand = cli.Command{
 			// Add new checker values.
 			Usage:   "Override the default checker, available values (diff, tokens)",
 			Aliases: []string{"io", "fio"},
-			Value:   "diff",
+			Value:   "tokens",
 		},
 	},
 	Usage:     "Run test cases using the provided solution",
