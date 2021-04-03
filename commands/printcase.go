@@ -4,8 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"os"
-	"path"
 	"strconv"
 
 	"github.com/chermehdi/egor/config"
@@ -14,7 +12,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func GetTestCase(egorMeta config.EgorMeta, id int) *TestCaseIO {
+func GetTestCase(egorMeta *config.EgorMeta, id int) *TestCaseIO {
 	var testCase *TestCaseIO
 	for _, input := range egorMeta.Inputs {
 		if input.GetId() == id {
@@ -25,7 +23,6 @@ func GetTestCase(egorMeta config.EgorMeta, id int) *TestCaseIO {
 				OutputPath: "",
 				Custom:     input.Custom,
 			}
-
 			break
 		}
 	}
@@ -47,30 +44,28 @@ func GetTestCase(egorMeta config.EgorMeta, id int) *TestCaseIO {
 }
 
 func PrintTestCaseInput(testCase *TestCaseIO) {
-
 	file, err := config.OpenFileFromPath(testCase.InputPath)
 	if err != nil {
 		color.Red("Failed to read test case input")
-	} else {
-		color.Green(utils.GetHeader("Input", "========", 10))
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			fmt.Println(scanner.Text())
-		}
+		return
 	}
-
+	color.Green(utils.GetHeader("Input", "========", 10))
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
+	}
 }
 
 func PrintTestCaseOutput(testCase *TestCaseIO) {
 	file, err := config.OpenFileFromPath(testCase.OutputPath)
 	if err != nil {
 		color.Red("Failed to read test case input")
-	} else {
-		color.Green(utils.GetHeader("Output", "========", 10))
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			fmt.Println(scanner.Text())
-		}
+		return
+	}
+	color.Green(utils.GetHeader("Output", "========", 10))
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
 	}
 }
 
@@ -92,20 +87,12 @@ func PrintCaseAction(context *cli.Context) error {
 		return fmt.Errorf("Failed to parse test id = %s", context.Args().Get(0))
 	}
 
-	cwd, err := os.Getwd()
-	if err != nil {
-		color.Red("Failed to list test cases!")
-		return err
-	}
-
-	configuration, err := config.LoadDefaultConfiguration()
 	if err != nil {
 		color.Red("Failed to load egor configuration")
 		return err
 	}
 
-	configFileName := configuration.ConfigFileName
-	metaData, err := config.LoadMetaFromPath(path.Join(cwd, configFileName))
+	metaData, err := config.GetMetadata()
 	if err != nil {
 		color.Red("Failed to load egor MetaData ")
 		return err

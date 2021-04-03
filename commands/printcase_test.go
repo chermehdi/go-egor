@@ -7,7 +7,7 @@ import (
 
 func TestGetTestCase(t *testing.T) {
 	metaData := createSimpleDummyMetaData()
-	testCase := GetTestCase(metaData, 0)
+	testCase := GetTestCase(&metaData, 0)
 
 	assert.Equal(t, testCase.Id, 0)
 	assert.Equal(t, testCase.Id, metaData.Inputs[0].GetId())
