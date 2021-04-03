@@ -25,15 +25,15 @@ func ReadLine(reader io.Reader) string {
 	return result
 }
 
-func askInt(reader io.Reader, question string, defaultValue float64) float64 {
+func askInt(reader io.Reader, question string, defaultValue int64) int64 {
 	color.Green("%s (%d by default): ", question, int(defaultValue))
 	input := ReadLine(reader)
-	var value = -1
+	var value int64 = -1
 	n, err := fmt.Sscanf(input, "%d", &value)
 	if err != nil || n == 0 || value == -1 {
 		return defaultValue
 	}
-	return float64(value)
+	return value
 }
 
 func askBool(reader io.Reader, question string, defaultValue bool) bool {

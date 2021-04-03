@@ -8,6 +8,8 @@ import (
 	"github.com/chermehdi/egor/config"
 )
 
+// BruteH is the template for generating brute-force cpp solutions for the
+// egor batch command.
 const BruteH = `
 #include <iostream>
 #include <vector>
@@ -19,6 +21,8 @@ int main() {
 }
 `
 
+// RandH is a Library to facilitate random number generation for egor batch.
+//
 // This is embeded as a literal string for easy shipping with the binary.
 // We could consider using some new Go feature to embed it as a static resource.
 // At the time of creation of this, this is not a priority.
@@ -236,6 +240,8 @@ const PythonTemplate = `
 # {{end}}
 `
 
+// ReolveTemplateByLanguage computes which template to be used by egor <command>
+// depending on local configuration.
 func ResolveTemplateByLanguage(config config.Config) (string, error) {
 	templates := config.CustomTemplate
 	path, has := templates[config.Lang.Default]

@@ -21,8 +21,6 @@ const Egor = `
 |------------------------------------>>
 `
 
-var EgorTemplate, _ = template.New("egor").Parse(Egor)
-
 // returns true if `--dev` flag has been supplied
 func isDev() bool {
 	for _, v := range os.Args {
@@ -40,7 +38,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = EgorTemplate.Execute(&egor, configuration)
+
+	egorTemplate, _ := template.New("egor").Parse(Egor)
+	err = egorTemplate.Execute(&egor, configuration)
 
 	if err != nil {
 		log.Fatal(err)
@@ -76,8 +76,7 @@ func main() {
 		},
 	}
 
-	err = app.Run(os.Args)
-	if err != nil {
+	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
 }

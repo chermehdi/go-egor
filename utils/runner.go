@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// ExecutionResult is the combined output of a command execution.
 type ExecutionResult struct {
 	Stdout bytes.Buffer
 	Stderr bytes.Buffer
@@ -33,6 +34,7 @@ type ExecutionContext struct {
 	Args string
 }
 
+// TODO(chemehdi): Add docs.
 type CodeRunner interface {
 	Compile(*ExecutionContext) (*ExecutionResult, error)
 	Run(*ExecutionContext) (*ExecutionResult, error)
@@ -77,8 +79,8 @@ func (r *PythonRunner) Run(context *ExecutionContext) (*ExecutionResult, error) 
 	return execute(context, "python3", context.FileName)
 }
 
-func CreateRunner(Lang string) (CodeRunner, bool) {
-	switch Lang {
+func CreateRunner(lang string) (CodeRunner, bool) {
+	switch lang {
 	case "cpp":
 		return &CppRunner{}, true
 	case "c":
@@ -91,15 +93,16 @@ func CreateRunner(Lang string) (CodeRunner, bool) {
 	return nil, false
 }
 
-// Utility function to execute a given command and insure to stop it after a timeOut (in miliseconds).
+// ExecuteWithTimeout to execute a given command and insure to stop it after a timeOut (in miliseconds).
 // The function returns the status of the execution, the duration of the exeuction, and an error (if any).
-func ExecuteWithTimeout(cmd *exec.Cmd, timeOut float64) (int8, time.Duration, error) {
+func ExecuteWithTimeout(cmd *exec.Cmd, timeOut int64) (int8, time.Duration, error) {
 	cmd.Start()
 	start := time.Now()
 	done := make(chan error)
 	go func() { done <- cmd.Wait() }()
 
 	timeout := time.After(time.Duration(timeOut) * time.Millisecond)
+
 	select {
 	case <-timeout:
 		elapsed := time.Since(start)

@@ -12,7 +12,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// Read from stdin till ctrl D or Command D
+// Read from stdin till (ctrl+D) or (Command+D)
 func readFromStdin() []string {
 	scn := bufio.NewScanner(os.Stdin)
 	var lines []string
@@ -46,35 +46,30 @@ func writeLinesToFile(filename string, lines []string) error {
 }
 
 // AddNewCaseInput Create and save user specified custom case input, and update the given egor meta data
-func AddNewCaseInput(inputLines []string,
-	caseName string,
-	metaData config.EgorMeta) (config.EgorMeta, error) {
-
+func AddNewCaseInput(inputLines []string, caseName string, metaData *config.EgorMeta) error {
 	inputFileName := caseName + ".in"
-	err := writeLinesToFile(path.Join("inputs", inputFileName), inputLines)
+	inputDir := path.Join("inputs", inputFileName)
+	err := writeLinesToFile(inputDir, inputLines)
 	if err != nil {
-		return metaData, err
+		return err
 	}
-	inputFile := config.NewIoFile(caseName, path.Join("inputs", inputFileName), true)
+	// Update the metadata
+	inputFile := config.NewIoFile(caseName, inputDir, true)
 	metaData.Inputs = append(metaData.Inputs, inputFile)
-
-	return metaData, nil
+	return nil
 }
 
 // AddNewCaseOutput Create and save user specified custom csae output, and update the given egor meta data
-func AddNewCaseOutput(outputLines []string,
-	caseName string,
-	metaData config.EgorMeta) (config.EgorMeta, error) {
-
+func AddNewCaseOutput(outputLines []string, caseName string, metaData *config.EgorMeta) error {
 	outputFileName := caseName + ".ans"
 	err := writeLinesToFile(path.Join("outputs", outputFileName), outputLines)
 	if err != nil {
-		return metaData, err
+		return err
 	}
+	// Update the metadata
 	outputFile := config.NewIoFile(caseName, path.Join("outputs", outputFileName), true)
 	metaData.Outputs = append(metaData.Outputs, outputFile)
-
-	return metaData, nil
+	return nil
 }
 
 // CustomCaseAction Create a user custom test case
@@ -94,8 +89,7 @@ func CustomCaseAction(context *cli.Context) error {
 		return err
 	}
 
-	configFileName := configuration.ConfigFileName
-	metaData, err := config.LoadMetaFromPath(path.Join(cwd, configFileName))
+	metaData, err := config.GetMetadata()
 	if err != nil {
 		color.Red("Failed to load egor MetaData ")
 		return err
@@ -104,9 +98,7 @@ func CustomCaseAction(context *cli.Context) error {
 	caseName := "test-" + strconv.Itoa(len(metaData.Inputs))
 	color.Green("Provide your input:")
 	inputLines := readFromStdin()
-	metaData, err = AddNewCaseInput(inputLines, caseName, metaData)
-
-	if err != nil {
+	if err = AddNewCaseInput(inputLines, caseName, metaData); err != nil {
 		color.Red("Failed to add new case input")
 		return err
 	}
@@ -117,16 +109,12 @@ func CustomCaseAction(context *cli.Context) error {
 		outputLines = readFromStdin()
 	}
 
-	metaData, err = AddNewCaseOutput(outputLines, caseName, metaData)
-
-	if err != nil {
+	if err = AddNewCaseOutput(outputLines, caseName, metaData); err != nil {
 		color.Red("Failed to add new case output")
 		return err
 	}
 
-	err = metaData.SaveToFile(path.Join(cwd, configFileName))
-
-	if err != nil {
+	if err = metaData.SaveToFile(path.Join(cwd, configuration.ConfigFileName)); err != nil {
 		color.Red("Failed to save to MetaData")
 		return err
 	}

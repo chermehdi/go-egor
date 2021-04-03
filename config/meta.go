@@ -10,8 +10,13 @@ import (
 	"path"
 	"strconv"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
+// IoFile is the input/ouput for egor run command.
+// IoFiles are stored in the `input/` `output/` directories and they are created
+// when parsing the task or manually via egor case.
 type IoFile struct {
 	Name   string
 	Path   string
@@ -26,6 +31,8 @@ func NewIoFile(fileName, filePath string, customCase bool) IoFile {
 	}
 }
 
+// since input files are created using this pattern `test-{id}`
+// This function will extract the id from the name.
 func (ioFile *IoFile) GetId() int {
 	tokens := strings.Split(ioFile.Name, "-")
 	id, err := strconv.Atoi(tokens[1])
@@ -35,7 +42,8 @@ func (ioFile *IoFile) GetId() int {
 	return id
 }
 
-// Type mapping to the `egor-meta.json` file.
+// EgorMeta is the type mapping to the `egor-meta.json` file.
+//
 // The egor meta configuration is the source of truth for the task runner
 // so an update to it (either from the outside, or by invoking egor commands) can change
 // the behavior of execution of the egor cli.
@@ -45,26 +53,27 @@ type EgorMeta struct {
 	Inputs    []IoFile
 	Outputs   []IoFile
 	TaskFile  string
-	TimeLimit float64
+	TimeLimit int64
 	// Path to the file containing the batch generator.
 	// Not setting this value implies that the task does not contain a Batch file.
 	BatchFile string
 }
 
-// Resolves the task file given the default language.
+// GetTaskName resolves the task file given the default language.
 func GetTaskName(config Config) (string, error) {
-	if config.Lang.Default == "cpp" {
+	switch config.Lang.Default {
+	case "cpp":
 		return "main.cpp", nil
-	} else if config.Lang.Default == "java" {
+	case "java":
 		return "Main.java", nil
-	} else if config.Lang.Default == "python" {
+	case "python":
 		return "main.py", nil
-	} else {
+	default:
 		return "", errors.New(fmt.Sprintf("Unknown default language %s, please edit your settings", config.Lang.Default))
 	}
 }
 
-// Creates a new Egor meta object from the parsed task, and the configuration values.
+// NewEgorMeta creates a new Egor meta object from the parsed task, and the configuration values.
 func NewEgorMeta(task Task, config Config) EgorMeta {
 	testCount := len(task.Tests)
 	inputs := make([]IoFile, testCount)
@@ -76,6 +85,7 @@ func NewEgorMeta(task Task, config Config) EgorMeta {
 	}
 	taskFile, err := GetTaskName(config)
 	if err != nil {
+		// TODO(chermehdi): Don't panic!!!
 		panic(err)
 	}
 	return EgorMeta{
@@ -89,12 +99,13 @@ func NewEgorMeta(task Task, config Config) EgorMeta {
 	}
 }
 
-// count the number of tests cases in the metadata. The number of tests is
-// the number of inputs
+// CountTestCases returns the number of tests cases in the metadata.
+// The number of tests is the number of input files.
 func (egor *EgorMeta) CountTestCases() int {
 	return len(egor.Inputs)
 }
 
+// HasBatch returns whether this task has a batch definition.
 func (egor *EgorMeta) HasBatch() bool {
 	if egor.BatchFile == "" {
 		return false
@@ -160,4 +171,27 @@ func CreateFile(filePath string) (*os.File, error) {
 func OpenFileFromPath(filePath string) (*os.File, error) {
 	file, err := os.Open(filePath)
 	return file, err
+}
+
+func GetMetadata() (*EgorMeta, error) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		color.Red(fmt.Sprintf("Failed to list test cases : %s", err.Error()))
+		return nil, err
+	}
+
+	configuration, err := LoadDefaultConfiguration()
+	if err != nil {
+		color.Red(fmt.Sprintf("Failed to load egor configuration: %s", err.Error()))
+		return nil, err
+	}
+
+	configFileName := configuration.ConfigFileName
+	metaData, err := LoadMetaFromPath(path.Join(cwd, configFileName))
+	if err != nil {
+		color.Red(fmt.Sprintf("Failed to load egor MetaData : %s", err.Error()))
+		return nil, err
+	}
+
+	return &metaData, nil
 }

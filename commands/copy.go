@@ -3,8 +3,6 @@ package commands
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
-	"path"
 
 	"github.com/atotto/clipboard"
 	"github.com/chermehdi/egor/config"
@@ -24,28 +22,21 @@ func GetFileContent(filePath string) (string, error) {
 }
 
 func CopyAction(*cli.Context) error {
-	cwd, err := os.Getwd()
+	conf, err := config.LoadDefaultConfiguration()
 	if err != nil {
-		color.Red(fmt.Sprintf("Failed to list test cases : %s", err.Error()))
+		color.Red(fmt.Sprintf("Failed to load default configuration: %s", err.Error()))
 		return err
 	}
-
-	configuration, err := config.LoadDefaultConfiguration()
-	if err != nil {
-		color.Red(fmt.Sprintf("Failed to load egor configuration: %s", err.Error()))
-		return err
-	}
-
-	configFileName := configuration.ConfigFileName
-	metaData, err := config.LoadMetaFromPath(path.Join(cwd, configFileName))
+	metaData, err := config.GetMetadata()
 	if err != nil {
 		color.Red(fmt.Sprintf("Failed to load egor MetaData : %s", err.Error()))
 		return err
 	}
+
 	var taskFile string
 
 	// TODO(chermehdi): the name of the generated file should be in a unique location
-	if (metaData.TaskLang == "cpp" || metaData.TaskLang == "c") && configuration.HasCppLibrary() {
+	if (metaData.TaskLang == "cpp" || metaData.TaskLang == "c") && conf.HasCppLibrary() {
 		taskFile = "main_gen.cpp"
 	} else {
 		taskFile = metaData.TaskFile

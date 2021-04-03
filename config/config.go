@@ -12,6 +12,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// TODO(chermehdi): Better version management, should be supported by the build
+// tool.
 const LatestVersion = "1.0.1"
 
 // Config The configuration of the CLI
@@ -33,34 +35,6 @@ type Config struct {
 
 func (conf *Config) HasCppLibrary() bool {
 	return conf.CppLibraryLocation != ""
-}
-
-func getDefaultConfigLocation() (string, error) {
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		return "", err
-	}
-	return path.Join(configDir, "egor.yaml"), nil
-}
-
-func createDefaultConfiguration() *Config {
-	homeDir, _ := os.UserHomeDir()
-	return &Config{
-		Server: struct {
-			Port int `yaml:"port"`
-		}{
-			Port: 1200,
-		},
-		Lang: struct {
-			Default string `yaml:"default"`
-		}{
-			Default: "cpp",
-		},
-		Version:            LatestVersion,
-		ConfigFileName:     "egor-meta.json",
-		CppLibraryLocation: path.Join(homeDir, "include"),
-		CustomTemplate:     make(map[string]string),
-	}
 }
 
 // SaveConfiguration This function is called when the configuration file does not exist already
@@ -132,10 +106,38 @@ func GetConfigurationValue(config *Config, key string) (string, error) {
 		return config.Author, nil
 	} else if lowerKey == "cpp.lib.location" {
 		return config.CppLibraryLocation, nil
-	} else if strings.HasPrefix(key,"config.templates") {
-		lang := key[strings.LastIndex(key,".") + 1:]
+	} else if strings.HasPrefix(key, "config.templates") {
+		lang := key[strings.LastIndex(key, ".")+1:]
 		return config.CustomTemplate[lang], nil
 	} else {
 		return "", fmt.Errorf("Unknown config key %s", key)
+	}
+}
+
+func getDefaultConfigLocation() (string, error) {
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		return "", err
+	}
+	return path.Join(configDir, "egor.yaml"), nil
+}
+
+func createDefaultConfiguration() *Config {
+	homeDir, _ := os.UserHomeDir()
+	return &Config{
+		Server: struct {
+			Port int `yaml:"port"`
+		}{
+			Port: 1200,
+		},
+		Lang: struct {
+			Default string `yaml:"default"`
+		}{
+			Default: "cpp",
+		},
+		Version:            LatestVersion,
+		ConfigFileName:     "egor-meta.json",
+		CppLibraryLocation: path.Join(homeDir, "include"),
+		CustomTemplate:     make(map[string]string),
 	}
 }

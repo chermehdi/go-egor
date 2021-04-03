@@ -79,7 +79,7 @@ type CaseDescription struct {
 	OutputFile string
 	WorkFile   string
 	CustomCase bool
-	TimeLimit  float64
+	TimeLimit  int64
 }
 
 func getWorkFile(fileName string) string {
@@ -89,7 +89,7 @@ func getWorkFile(fileName string) string {
 }
 
 // Creates a new CaseDescription from a pair of input and output IoFiles
-func NewCaseDescription(input, output config.IoFile, timeLimit float64) *CaseDescription {
+func NewCaseDescription(input, output config.IoFile, timeLimit int64) *CaseDescription {
 	base, file := filepath.Split(input.Path)
 	workFilePath := path.Join(base, getWorkFile(file))
 	return &CaseDescription{

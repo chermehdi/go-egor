@@ -45,7 +45,7 @@ func TestAddNewCaseInput(t *testing.T) {
 
 	inputLines := []string{"Hello", "World"}
 	caseName := "test-2"
-	meteData, err := AddNewCaseInput(inputLines, caseName, meteData)
+	err := AddNewCaseInput(inputLines, caseName, &meteData)
 
 	assert.Equal(t, err, nil)
 	assert.Equal(t, len(meteData.Inputs), 3)
@@ -64,7 +64,7 @@ func TestAddNewCaseOutput(t *testing.T) {
 
 	outputLines := []string{"Hello", "World"}
 	caseName := "test-2"
-	meteData, err := AddNewCaseOutput(outputLines, caseName, meteData)
+	err := AddNewCaseOutput(outputLines, caseName, &meteData)
 
 	assert.Equal(t, err, nil)
 	assert.Equal(t, len(meteData.Outputs), 2)
