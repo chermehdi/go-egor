@@ -12,11 +12,11 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func GetTestCase(egorMeta *config.EgorMeta, id int) *TestCaseIO {
-	var testCase *TestCaseIO
+func GetTestCase(egorMeta *config.EgorMeta, id int) *testCaseIO {
+	var testCase *testCaseIO
 	for _, input := range egorMeta.Inputs {
 		if input.GetId() == id {
-			testCase = &TestCaseIO{
+			testCase = &testCaseIO{
 				Id:         input.GetId(),
 				Name:       input.Name,
 				InputPath:  input.Path,
@@ -43,7 +43,7 @@ func GetTestCase(egorMeta *config.EgorMeta, id int) *TestCaseIO {
 	return testCase
 }
 
-func PrintTestCaseInput(testCase *TestCaseIO) {
+func PrintTestCaseInput(testCase *testCaseIO) {
 	file, err := config.OpenFileFromPath(testCase.InputPath)
 	if err != nil {
 		color.Red("Failed to read test case input")
@@ -56,7 +56,7 @@ func PrintTestCaseInput(testCase *TestCaseIO) {
 	}
 }
 
-func PrintTestCaseOutput(testCase *TestCaseIO) {
+func PrintTestCaseOutput(testCase *testCaseIO) {
 	file, err := config.OpenFileFromPath(testCase.OutputPath)
 	if err != nil {
 		color.Red("Failed to read test case input")
