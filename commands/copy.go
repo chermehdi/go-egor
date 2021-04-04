@@ -21,26 +21,14 @@ func GetFileContent(filePath string) (string, error) {
 	return filecontent, nil
 }
 
-func CopyAction(*cli.Context) error {
-	conf, err := config.LoadDefaultConfiguration()
-	if err != nil {
-		color.Red(fmt.Sprintf("Failed to load default configuration: %s", err.Error()))
-		return err
-	}
-	metaData, err := config.GetMetadata()
-	if err != nil {
-		color.Red(fmt.Sprintf("Failed to load egor MetaData : %s", err.Error()))
-		return err
-	}
-
-	var taskFile string
-
-	// TODO(chermehdi): the name of the generated file should be in a unique location
+func getGenFile(metaData *config.EgorMeta, conf *config.Config) string {
 	if (metaData.TaskLang == "cpp" || metaData.TaskLang == "c") && conf.HasCppLibrary() {
-		taskFile = "main_gen.cpp"
-	} else {
-		taskFile = metaData.TaskFile
+		return "main_gen.cpp"
 	}
+	return metaData.TaskFile
+}
+
+func copyToClipboard(taskFile string) error {
 	taskContent, err := GetFileContent(taskFile)
 	if err != nil {
 		color.Red(fmt.Sprintf("Failed to load task file content : %s", err.Error()))
@@ -55,6 +43,22 @@ func CopyAction(*cli.Context) error {
 
 	color.Green("Task copied to clipboard successfully")
 	return nil
+}
+
+func CopyAction(*cli.Context) error {
+	conf, err := config.LoadDefaultConfiguration()
+	if err != nil {
+		color.Red(fmt.Sprintf("Failed to load default configuration: %s", err.Error()))
+		return err
+	}
+	metaData, err := config.GetMetadata()
+	if err != nil {
+		color.Red(fmt.Sprintf("Failed to load egor MetaData : %s", err.Error()))
+		return err
+	}
+
+	taskFile := getGenFile(metaData, conf)
+	return copyToClipboard(taskFile)
 }
 
 // CopyCommand Command to copy task source file to clipboard for easy submit.
