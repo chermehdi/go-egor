@@ -12,7 +12,6 @@ import (
 	"math/rand"
 	"os"
 	"path"
-	template2 "text/template"
 
 	"github.com/urfave/cli/v2"
 )
@@ -23,18 +22,32 @@ const (
 	GenName   = "gen.cpp"
 )
 
+// This is usefull to mock the implementation easily in tests.
+type runnerProvider func(string) (utils.CodeRunner, bool)
+
+func writeRandLib() error {
+	// Create the rand.h file
+	if err := ioutil.WriteFile(RandName, []byte(templates.RandH), 0755); err != nil {
+		return err
+	}
+	return nil
+}
+
+func writeBruteTpl() error {
+	if err := ioutil.WriteFile(BruteName, []byte(templates.BruteH), 0755); err != nil {
+		return err
+	}
+	return nil
+}
+
 // CreateBatch will create the batch directory structure with the files needed
 func CreateBatch(context *cli.Context) error {
-	configuration, err := config.LoadDefaultConfiguration()
+	conf, err := config.LoadDefaultConfiguration()
 	if err != nil {
 		return err
 	}
-	cwd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	egorMetaFile := path.Join(cwd, configuration.ConfigFileName)
-	egorMeta, err := config.LoadMetaFromPath(egorMetaFile)
+
+	egorMeta, err := config.GetMetadata()
 	if err != nil {
 		return err
 	}
@@ -44,68 +57,49 @@ func CreateBatch(context *cli.Context) error {
 		return nil
 	}
 
-	genPath := path.Join(cwd, GenName)
-	egorMeta.BatchFile = genPath
-	// Create the generator file
+	egorMeta.BatchFile = GenName
+	genFile, err := config.CreateFile(GenName)
 
-	genTemp := template2.New("Solution template")
-	compiledTemplate, err := genTemp.Parse(templates.GeneratorTemplate)
-	if err != nil {
-		return err
-	}
-	genFile, err := config.CreateFile(genPath)
 	if err != nil {
 		return nil
 	}
-	// TODO(chermehdi): Move this outside, it smells of code repetition
-	if err = compiledTemplate.Execute(genFile, configuration); err != nil {
-		return err
-	}
-	randH := path.Join(cwd, RandName)
-	// Create the rand.h file
-	if err = ioutil.WriteFile(randH, []byte(templates.RandH), 0755); err != nil {
+	if err := templates.Compile(templates.GeneratorTemplate, genFile, conf); err != nil {
 		return err
 	}
 
-	bruteH := path.Join(cwd, BruteName)
-	if err = ioutil.WriteFile(bruteH, []byte(templates.BruteH), 0755); err != nil {
-		return err
+	if err := writeRandLib(); err != nil {
+		return nil
 	}
-	// Update the metadata
-	fileName := path.Join(cwd, configuration.ConfigFileName)
-	if err = egorMeta.SaveToFile(fileName); err != nil {
+
+	if err := writeBruteTpl(); err != nil {
+		return nil
+	}
+
+	if err = egorMeta.SaveToFile(conf.ConfigFileName); err != nil {
 		return err
 	}
 	color.Green("Batch creation completed successfully")
 	return nil
 }
 
-func runBatchInternal(context *cli.Context) error {
-	configuration, err := config.LoadDefaultConfiguration()
-	if err != nil {
-		return err
-	}
+func runBatchInternal(n int, egorMeta *config.EgorMeta, provider runnerProvider) error {
 	cwd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
-	egorMetaFile := path.Join(cwd, configuration.ConfigFileName)
-	egorMeta, err := config.LoadMetaFromPath(egorMetaFile)
-	if err != nil {
-		return err
-	}
 	if !egorMeta.HasBatch() {
-		color.Red("The current task does not have a batch setting, did you forget to run egor batch create?")
+		color.Red("The current task does not have a batch setting, did you forget to run `egor batch create`?")
 		return nil
 	}
-	n := context.Int("tests")
-	runner, found := utils.CreateRunner(egorMeta.TaskLang)
+	runner, found := provider(egorMeta.TaskLang)
 	// This used to run the generator
 	if !found {
 		color.Red("No task runner found for the task's default language, make sure to not change the egor metafile unless manually unless you know what you are doing!")
 		return errors.New("Task runner not found!")
 	}
-	cppr, _ := utils.CreateRunner("cpp")
+
+	// This is safe because a cpp runner will always be found.
+	cppr, _ := provider("cpp")
 
 	// Compile the generator
 	c := &utils.ExecutionContext{
@@ -251,23 +245,29 @@ func getBinaryName(lang string) string {
 	case "python":
 		return "main.py"
 	}
-	// should not get here.
-	return ""
+	panic(fmt.Sprintf("Unknown language '%s'", lang))
 }
 
 // RunBatch will delegate to the internal function to do the actual batch
 // running and it will handle clean up afterwards (delete residual binary
 // files).
 func RunBatch(context *cli.Context) error {
-	err := runBatchInternal(context)
+	provider := func(name string) (utils.CodeRunner, bool) {
+		return utils.CreateRunner(name)
+	}
+	egorMeta, err := config.GetMetadata()
+	if err != nil {
+		return err
+	}
 	cwd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
-	os.Remove(path.Join(cwd, "sol"))
-	os.Remove(path.Join(cwd, "brute"))
-	os.Remove(path.Join(cwd, "gen"))
-	return err
+	defer os.Remove(path.Join(cwd, "sol"))
+	defer os.Remove(path.Join(cwd, "brute"))
+	defer os.Remove(path.Join(cwd, "gen"))
+	n := context.Int("tests")
+	return runBatchInternal(n, egorMeta, provider)
 }
 
 var BatchCommand = cli.Command{
