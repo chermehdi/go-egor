@@ -147,7 +147,6 @@ func runBatchInternal(context *cli.Context) error {
 
 	log.Println("Finished compiling the solution")
 
-	log.Println("Finished compiling the brute force solution")
 	// Compile the brute force solution
 	c2 := &utils.ExecutionContext{
 		FileName:   BruteName,
@@ -197,20 +196,6 @@ func runBatchInternal(context *cli.Context) error {
 		inC2 := res.Stdout
 
 		// Run the main solution
-		// Feed the output of the generator as the main solution's input.
-		c1.Input = &res.Stdout
-		main, err := runner.Run(c1)
-		if err != nil {
-			color.Red("Could not run the solution")
-			if main.Stderr.String() != "" {
-				color.Red(main.Stderr.String())
-			}
-			return err
-		}
-
-		log.Println("Finished running main the solution")
-
-		// Run the main solution
 		// Feed the output of the generator as the brute solution's input.
 		log.Println("Running the brute solution ...")
 
@@ -221,8 +206,28 @@ func runBatchInternal(context *cli.Context) error {
 			if brute.Stderr.String() != "" {
 				color.Red(brute.Stderr.String())
 			}
+			color.Red("Input: ")
+			fmt.Println(inC2.String())
 			return err
 		}
+		log.Println("Finished running the brute force solution")
+
+		// Run the main solution
+		// Feed the output of the generator as the main solution's input.
+		c1.Input = &res.Stdout
+		main, err := runner.Run(c1)
+		if err != nil {
+			color.Red("Could not run the solution")
+			if main.Stderr.String() != "" {
+				color.Red(main.Stderr.String())
+			}
+			color.Red("Input: ")
+			fmt.Println(inC2.String())
+			color.Red("Expected: ")
+			fmt.Println(brute.Stdout.String())
+			return err
+		}
+		log.Println("Finished running main the solution")
 
 		if err := checker.Check(brute.Stdout.String(), main.Stdout.String()); err != nil {
 			color.Red("Found diff: ")
