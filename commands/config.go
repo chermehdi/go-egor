@@ -19,7 +19,7 @@ func UpdateConfiguration(config *config.Config, key, value string) error {
 		}
 		config.Server.Port = port
 	} else if lowerKey == "lang.default" {
-		// suppose that the language is valid (cpp, python, java ...)
+		// suppose that the language is valid (cpp, python, java, rust...)
 		config.Lang.Default = value
 	} else if lowerKey == "author" {
 		config.Author = value

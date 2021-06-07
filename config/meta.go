@@ -3,7 +3,6 @@ package config
 import (
 	"bytes"
 	json2 "encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -59,8 +58,10 @@ func GetTaskName(config Config) (string, error) {
 		return "Main.java", nil
 	} else if config.Lang.Default == "python" {
 		return "main.py", nil
+	} else if config.Lang.Default == "rust" {
+		return "main.rs", nil
 	} else {
-		return "", errors.New(fmt.Sprintf("Unknown default language %s, please edit your settings", config.Lang.Default))
+		return "", fmt.Errorf("unknown default language %s, please edit your settings", config.Lang.Default)
 	}
 }
 

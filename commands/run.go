@@ -460,6 +460,56 @@ func (judge *PythonJudge) Cleanup() error {
 	return nil
 }
 
+//
+// Rust judge
+//
+type RustJudge struct {
+	Meta           config.EgorMeta
+	CurrentWorkDir string
+	checker        Checker
+}
+
+func (j *RustJudge) Setup() error {
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	workDirPath := path.Join(currentDir, config.WorkDir)
+	if _, err = os.Stat(workDirPath); os.IsNotExist(err) {
+		if err := os.Mkdir(workDirPath, 0777); err != nil {
+			return err
+		}
+	}
+
+	var stderrBuffer bytes.Buffer
+	cmd := exec.Command("rustc", "--edition=2018", "-O", "-o", path.Join(workDirPath, "sol"), j.Meta.TaskFile)
+	cmd.Dir = currentDir
+	cmd.Stderr = &stderrBuffer
+	if err = cmd.Run(); err != nil {
+		color.Red("Could not  compile, Cause: \n%s", stderrBuffer.String())
+		return err
+	}
+	j.CurrentWorkDir = workDirPath
+	return nil
+}
+
+func (j *RustJudge) WorkDir() string {
+	return j.CurrentWorkDir
+}
+
+func (j *RustJudge) RunTestCase(desc CaseDescription) CaseStatus {
+	caseStatus, _ := execute(j, desc, j.CurrentWorkDir+"/sol")
+	return caseStatus
+}
+
+func (j *RustJudge) Cleanup() error {
+	return os.RemoveAll(j.CurrentWorkDir)
+}
+
+func (j *RustJudge) Checker() Checker {
+	return j.checker
+}
+
 // Creates and returns a Judge implementation corresponding to the given language
 func NewJudgeFor(meta config.EgorMeta, configuration *config.Config, checker Checker) (Judge, error) {
 	switch meta.TaskLang {
@@ -471,6 +521,8 @@ func NewJudgeFor(meta config.EgorMeta, configuration *config.Config, checker Che
 		return &CppJudge{Meta: meta, checker: checker, hasLibrary: configuration.HasCppLibrary(), LibraryLocation: configuration.CppLibraryLocation}, nil
 	case "python":
 		return &PythonJudge{Meta: meta, checker: checker}, nil
+	case "rust":
+		return &RustJudge{Meta: meta, checker: checker}, nil
 	}
 	return nil, fmt.Errorf("Cannot find judge for the given lang %s", meta.TaskLang)
 }

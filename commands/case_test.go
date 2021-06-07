@@ -1,11 +1,12 @@
 package commands
 
 import (
-	"github.com/chermehdi/egor/config"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/chermehdi/egor/config"
+	"github.com/stretchr/testify/assert"
 )
 
 func createDummyMetaData() config.EgorMeta {
