@@ -3,10 +3,11 @@ package utils
 import (
 	"bytes"
 	"fmt"
-	"github.com/chermehdi/egor/config"
 	"log"
 	"os/exec"
 	"time"
+
+	"github.com/chermehdi/egor/config"
 )
 
 type ExecutionResult struct {
@@ -77,6 +78,17 @@ func (r *PythonRunner) Run(context *ExecutionContext) (*ExecutionResult, error) 
 	return execute(context, "python3", context.FileName)
 }
 
+type RustRunner struct {
+}
+
+func (r *RustRunner) Compile(context *ExecutionContext) (*ExecutionResult, error) {
+	return execute(context, "rustc", "--edition=2018", "-O", "-o", context.BinaryName, context.FileName)
+}
+
+func (r *RustRunner) Run(context *ExecutionContext) (*ExecutionResult, error) {
+	return execute(context, fmt.Sprintf("./%s", context.BinaryName), context.Args)
+}
+
 func CreateRunner(Lang string) (CodeRunner, bool) {
 	switch Lang {
 	case "cpp":
@@ -87,6 +99,8 @@ func CreateRunner(Lang string) (CodeRunner, bool) {
 		return &JavaRunner{}, true
 	case "python":
 		return &PythonRunner{}, true
+	case "rust":
+		return &RustRunner{}, true
 	}
 	return nil, false
 }

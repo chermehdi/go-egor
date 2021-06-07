@@ -3,16 +3,17 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"github.com/chermehdi/egor/config"
-	"github.com/chermehdi/egor/templates"
-	"github.com/chermehdi/egor/utils"
-	"github.com/fatih/color"
 	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
 	"path"
 	template2 "text/template"
+
+	"github.com/chermehdi/egor/config"
+	"github.com/chermehdi/egor/templates"
+	"github.com/chermehdi/egor/utils"
+	"github.com/fatih/color"
 
 	"github.com/urfave/cli/v2"
 )
@@ -250,9 +251,10 @@ func getBinaryName(lang string) string {
 		return "Main"
 	case "python":
 		return "main.py"
+	case "rust":
+		return "main"
 	}
-	// should not get here.
-	return ""
+	panic(fmt.Sprintf("unsupported language: %s", lang))
 }
 
 // RunBatch will delegate to the internal function to do the actual batch
@@ -260,6 +262,9 @@ func getBinaryName(lang string) string {
 // files).
 func RunBatch(context *cli.Context) error {
 	err := runBatchInternal(context)
+	if err != nil {
+		return err
+	}
 	cwd, err := os.Getwd()
 	if err != nil {
 		return err

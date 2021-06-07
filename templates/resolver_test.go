@@ -1,12 +1,12 @@
 package templates
 
 import (
-	"github.com/chermehdi/egor/config"
 	"io/ioutil"
 	"os"
 	"path"
 	"testing"
 
+	"github.com/chermehdi/egor/config"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -33,6 +33,10 @@ func TestResolveTemplateByLanguageJava(t *testing.T) {
 
 func TestResolveTemplateByLanguagePython(t *testing.T) {
 	testResolveTemplate(t, "python", PythonTemplate)
+}
+
+func TestResolveTemplateByLanguageRust(t *testing.T) {
+	testResolveTemplate(t, "rust", RustTemplate)
 }
 
 func TestResolveTemplateByLanguageCpp(t *testing.T) {
